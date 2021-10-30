@@ -1,0 +1,5 @@
+.idea
+.nyc_output
+test/
+build/
+build-pre-gyp/

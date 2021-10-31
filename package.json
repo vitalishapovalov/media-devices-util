@@ -1,6 +1,6 @@
 {
   "name": "media-devices-util",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "This package exposes and API to get info about mac/win media devices",
   "main": "index.js",
   "types": "index.d.ts",
@@ -13,6 +13,17 @@
     "prebuild-win32-x64": "prebuildify -t 16.13.0 -t electron@15.3.0 --napi --strip --platform win32",
     "test": "tap"
   },
+  "keywords": [
+    "ffmpeg",
+    "ffmpeg-devices",
+    "media devices",
+    "enumerate media devices",
+    "screen",
+    "camera",
+    "microphone",
+    "capturing",
+    "list media devices"
+  ],
   "gypfile": true,
   "dependencies": {
     "node-addon-api": "4.2.0",

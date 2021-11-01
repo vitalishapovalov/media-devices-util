@@ -16,10 +16,6 @@ class MediaDevicesUtilWin : public Napi::Addon<MediaDevicesUtilWin> {
             });
         }
 
-        ~MediaDevicesUtilWin() {
-            CoUninitialize();
-        }
-
     protected:
         Napi::Value get_video_devices(const Napi::CallbackInfo& info) {
             std::vector<Device> video_devices_vector = fill_devices_list(CLSID_VideoInputDeviceCategory);
@@ -101,7 +97,10 @@ class MediaDevicesUtilWin : public Napi::Addon<MediaDevicesUtilWin> {
                 pPropBag->Release();
                 pMoniker->Release();
             }
+
             pEnum->Release();
+
+            CoUninitialize();
 
             return available_devices;
         }

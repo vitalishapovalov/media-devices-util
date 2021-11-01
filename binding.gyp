@@ -6,7 +6,7 @@
         ],
         "sources": [
           "./src/Device.cpp",
-          "./src/NapiUtil.cpp"
+          "./src/ConverterUtil.cpp"
         ],
         "conditions": [
             ["OS == 'mac'", {

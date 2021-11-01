@@ -4,7 +4,7 @@
 #import <AVFoundation/AVFoundation.h>
 
 #include "Device.h"
-#include "NapiUtil.h"
+#include "ConverterUtil.h"
 
 class MediaDevicesUtilMac : public Napi::Addon<MediaDevicesUtilMac> {
     public:
@@ -49,7 +49,7 @@ class MediaDevicesUtilMac : public Napi::Addon<MediaDevicesUtilMac> {
                 }
             }
 
-            return NapiUtil::map_devices_vector_to_napi_arr(available_devices, info.Env());
+            return ConverterUtil::devices_vector_to_napi_arr(available_devices, info.Env());
         }
 
         Napi::Value get_audio_devices(const Napi::CallbackInfo& info) {
@@ -62,7 +62,7 @@ class MediaDevicesUtilMac : public Napi::Addon<MediaDevicesUtilMac> {
                 available_devices.push_back(Device(index, label));
             }
 
-            return NapiUtil::map_devices_vector_to_napi_arr(available_devices, info.Env());
+            return ConverterUtil::devices_vector_to_napi_arr(available_devices, info.Env());
         }
 };
 

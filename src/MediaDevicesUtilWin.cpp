@@ -1,14 +1,11 @@
 #include <vector>
-#include <locale>
-#include <sstream>
 #include <string>
-#include <regex>
 #include <napi.h>
 #include <windows.h>
 #include <dshow.h>
 
 #include "Device.h"
-#include "NapiUtil.h"
+#include "ConverterUtil.h"
 
 class MediaDevicesUtilWin : public Napi::Addon<MediaDevicesUtilWin> {
     public:
@@ -26,22 +23,12 @@ class MediaDevicesUtilWin : public Napi::Addon<MediaDevicesUtilWin> {
     protected:
         Napi::Value get_video_devices(const Napi::CallbackInfo& info) {
             std::vector<Device> video_devices_vector = fill_devices_list(CLSID_VideoInputDeviceCategory);
-            return NapiUtil::map_devices_vector_to_napi_arr(video_devices_vector, info.Env());
+            return ConverterUtil::devices_vector_to_napi_arr(video_devices_vector, info.Env());
         }
 
         Napi::Value get_audio_devices(const Napi::CallbackInfo& info) {
             std::vector<Device> audio_devices_vector = fill_devices_list(CLSID_AudioInputDeviceCategory);
-            return NapiUtil::map_devices_vector_to_napi_arr(audio_devices_vector, info.Env());
-        }
-
-        std::string to_narrow(const wchar_t *s) {
-          std::ostringstream stm;
-          const std::locale& loc = std::locale();
-          char dfault = '?';
-          while (*s != L'\0') {
-            stm << std::use_facet<std::ctype<wchar_t>>(loc).narrow(*s++, dfault);
-          }
-          return stm.str();
+            return ConverterUtil::devices_vector_to_napi_arr(audio_devices_vector, info.Env());
         }
 
         HRESULT enumerate_devices(REFGUID category, IEnumMoniker **ppEnum) {
@@ -52,7 +39,7 @@ class MediaDevicesUtilWin : public Napi::Addon<MediaDevicesUtilWin> {
                 // create an enumerator for the category
                 hr = pDevEnum->CreateClassEnumerator(category, ppEnum, 0);
                 if (hr == S_FALSE) {
-                    hr = VFW_E_NOT_FOUND;  // the category is empty, treat as an error
+                    hr = VFW_E_NOT_FOUND;  // the category is empty, treat as an error, TODO should we?
                 }
                 pDevEnum->Release();
             }
@@ -82,36 +69,30 @@ class MediaDevicesUtilWin : public Napi::Addon<MediaDevicesUtilWin> {
                     continue;
                 }
 
-                VARIANT var;
-                IBindCtx *bind_ctx = NULL;
-                LPOLESTR olestr = NULL;
-                LPMALLOC co_malloc = NULL;
-                VariantInit(&var);
                 Device deviceToAdd = Device();
 
-                r = CoGetMalloc(1, &co_malloc);
-                if (r != S_OK) {
-                    return available_devices;
-                }
+                // getting display name to be used as id (the same as FFMPEG does)
+                IBindCtx *bind_ctx = NULL;
+                LPOLESTR olestr = NULL;
                 r = CreateBindCtx(0, &bind_ctx);
-                if (r != S_OK) {
-                    return available_devices;
+                if (r == S_OK) {
+                    r = pMoniker->GetDisplayName(bind_ctx, NULL, &olestr);
+                    if (r == S_OK) {
+                        deviceToAdd.label = ConverterUtil::wchar_to_string(olestr);
+                        // replace ':' with '_' since we use : to delineate between sources
+                        std::replace(deviceToAdd.label.begin(), deviceToAdd.label.end(), ':', '_');
+                    }
                 }
-                r = pMoniker->GetDisplayName(bind_ctx, NULL, &olestr);
-                if (r != S_OK) {
-                    return available_devices;
-                }
-                deviceToAdd.label = to_narrow(olestr);
-                // replace ':' with '_' since we use : to delineate between sources (the same as FFMPEG does)
-                std::replace(deviceToAdd.label.begin(), deviceToAdd.label.end(), ':', '_');
 
                 // get description or friendly name (the same as FFMPEG does)
+                VARIANT var;
+                VariantInit(&var);
                 hr = pPropBag->Read(L"Description", &var, 0);
                 if (FAILED(hr)) {
                     hr = pPropBag->Read(L"FriendlyName", &var, 0);
                 }
                 if (SUCCEEDED(hr)) {
-                    deviceToAdd.id = to_narrow(var.bstrVal);
+                    deviceToAdd.id = ConverterUtil::wchar_to_string(var.bstrVal);
                     VariantClear(&var);
                 }
 

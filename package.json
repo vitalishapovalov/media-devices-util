@@ -4,6 +4,7 @@
   "description": "This package exposes and API to get info about mac/win media devices",
   "main": "index.js",
   "types": "index.d.ts",
+  "license": "MIT",
   "author": {
     "name": "Vitalii Shapovalov",
     "email": "<shapovalov.vitali.v@gmail.com>"

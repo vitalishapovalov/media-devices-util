@@ -1,5 +1,12 @@
 # media-devices-util
 
+<a href="https://badge.fury.io/js/media-devices-util">
+  <img src="https://badge.fury.io/js/media-devices-util.svg">
+</a>
+<a href="https://github.com/vitalishapovalov/media-devices-util/blob/master/LICENSE">
+  <img src="https://img.shields.io/github/license/vitalishapovalov/media-devices-util.svg">
+</a>
+
 What is this package for? To get info about available media devices, so it can be passed then to other programs (e.g. use with `ffmpeg`, to provide input).
 
 When using an `ffmpeg` or other libs to capture audio/video devices, you first need to obtain a list of available devices and their labels (IDs).
@@ -67,7 +74,7 @@ console.log({ audioDevices, videoDevices });
 // }
 ```
 
-## API
+### API
 
 `media-devices-util` object has the following API:
 
@@ -85,7 +92,7 @@ type TMediaDevicesUtil = {
 }
 ```
 
-### getDefaultAudioDevice
+#### getDefaultAudioDevice
 
 Supported platforms: `win`, `mac`
 
@@ -93,7 +100,7 @@ Return type: `TDevice`
 
 Retrieve the default audio input device (microphone).
 
-### getDefaultVideoDevice
+#### getDefaultVideoDevice
 
 Supported platforms: `win`
 
@@ -101,7 +108,7 @@ Return type: `TDevice`
 
 Retrieve the default video input device (camera).
 
-### getVideoDevices
+#### getVideoDevices
 
 Supported platforms: `win`, `mac`
 
@@ -109,7 +116,7 @@ Return type: `TDevice[]`
 
 Retrieve the default video input devices list (cameras, screens, etc.).
 
-### getAudioDevices
+#### getAudioDevices
 
 Supported platforms: `win`, `mac`
 

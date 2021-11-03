@@ -2,23 +2,44 @@ const test = require("tap").test;
 
 const mediaDevicesUtil = require("..");
 
-test("should return an Array", (t) => {
+const verifyDeviceObject = (t, device) => {
+    t.type(device, "object");
+    t.type(device.id, "string");
+    t.type(device.label, "string");
+};
+
+test("getDefaultAudioDevice - should return 'Device' object", (t) => {
+    verifyDeviceObject(t, mediaDevicesUtil.getDefaultAudioDevice());
+    t.end();
+});
+
+test("getDefaultVideoDevice - should return 'Device' object", (t) => {
+    verifyDeviceObject(t, mediaDevicesUtil.getDefaultVideoDevice());
+    t.end();
+});
+
+test("getVideoDevices - should return an Array", (t) => {
     t.assert(Array.isArray(mediaDevicesUtil.getVideoDevices()));
+    t.end();
+});
+
+test("getAudioDevices - should return an Array", (t) => {
     t.assert(Array.isArray(mediaDevicesUtil.getAudioDevices()));
     t.end();
 });
 
-test("returned array should consist of 'Device' objects", (t) => {
+test("getVideoDevices - returned array should consist of 'Device' objects", (t) => {
     const videoDevices = mediaDevicesUtil.getVideoDevices();
+    for (const videoDevice of videoDevices) {
+        verifyDeviceObject(t, videoDevice);
+    }
+    t.end();
+});
+
+test("getAudioDevices - returned array should consist of 'Device' objects", (t) => {
     const audioDevices = mediaDevicesUtil.getAudioDevices();
-    const traverseAssertDevices = (devices) => {
-        for (const device of devices) {
-            t.type(device, "object");
-            t.type(device.id, "string");
-            t.type(device.label, "string");
-        }
-    };
-    traverseAssertDevices(videoDevices);
-    traverseAssertDevices(audioDevices);
+    for (const audioDevice of audioDevices) {
+        verifyDeviceObject(t, audioDevice);
+    }
     t.end();
 });

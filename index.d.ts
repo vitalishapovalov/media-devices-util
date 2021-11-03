@@ -4,6 +4,8 @@ declare type TDevice = {
 }
 
 declare type TMediaDevicesUtil = {
+  getDefaultVideoDevice(): TDevice;
+  getDefaultAudioDevice(): TDevice;
   getVideoDevices(): TDevice[];
   getAudioDevices(): TDevice[];
 }

@@ -1,9 +1,17 @@
 {
   "name": "media-devices-util",
-  "version": "0.0.5",
+  "version": "0.0.6-SNAPSHOT",
   "description": "This package exposes and API to get info about mac/win media devices",
   "main": "index.js",
   "types": "index.d.ts",
+  "author": {
+    "name": "Vitalii Shapovalov",
+    "email": "<shapovalov.vitali.v@gmail.com>"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vitalishapovalov/media-devices-util.git"
+  },
   "scripts": {
     "install": "node-gyp-build",
     "rebuild": "npm run install --build-from-source",
@@ -22,7 +30,9 @@
     "camera",
     "microphone",
     "capturing",
-    "list media devices"
+    "list media devices",
+    "capturing devices",
+    "get default device"
   ],
   "gypfile": true,
   "dependencies": {

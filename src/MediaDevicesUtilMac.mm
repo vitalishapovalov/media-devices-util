@@ -11,11 +11,23 @@ class MediaDevicesUtilMac : public Napi::Addon<MediaDevicesUtilMac> {
         MediaDevicesUtilMac(Napi::Env env, Napi::Object exports) {
             DefineAddon(exports, {
                 InstanceMethod("getVideoDevices", &MediaDevicesUtilMac::get_video_devices),
-                InstanceMethod("getAudioDevices", &MediaDevicesUtilMac::get_audio_devices)
+                InstanceMethod("getAudioDevices", &MediaDevicesUtilMac::get_audio_devices),
+                InstanceMethod("getDefaultVideoDevice", &MediaDevicesUtilMac::get_default_video_device),
+                InstanceMethod("getDefaultAudioDevice", &MediaDevicesUtilMac::get_default_audio_device)
             });
         }
 
     protected:
+        Napi::Value get_default_video_device(const Napi::CallbackInfo& info) {
+            Device defaultVideoDevice = get_default_device(AVMediaTypeVideo);
+            return ConverterUtil::device_to_napi_object(defaultVideoDevice, info.Env());
+        }
+
+        Napi::Value get_default_audio_device(const Napi::CallbackInfo& info) {
+            Device defaultAudioDevice = get_default_device(AVMediaTypeAudio);
+            return ConverterUtil::device_to_napi_object(defaultAudioDevice, info.Env());
+        }
+
         Napi::Value get_video_devices(const Napi::CallbackInfo& info) {
             uint32_t num_screens = 0;
             std::vector<Device> available_devices;
@@ -64,6 +76,16 @@ class MediaDevicesUtilMac : public Napi::Addon<MediaDevicesUtilMac> {
 
             return ConverterUtil::devices_vector_to_napi_arr(available_devices, info.Env());
         }
+
+    private:
+        Device get_default_device(const AVMediaType media_type) {
+            NSArray *devices = [AVCaptureDevice devicesWithMediaType:media_type];
+            AVCaptureDevice *device = [AVCaptureDevice defaultDeviceWithMediaType:media_type];
+            std::string label = [[device localizedName] UTF8String];
+            int index = [devices indexOfObject:device];
+            return Device(index, label);
+        }
+
 };
 
 NODE_API_ADDON(MediaDevicesUtilMac);

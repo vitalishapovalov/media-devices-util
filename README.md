@@ -1,10 +1,12 @@
 # media-devices-util
 
-What is this package for?
+What is this package for? To get info about available media devices, so it can be passed then to other programs (e.g. use with `ffmpeg`, to provide input).
 
 When using an `ffmpeg` or other libs to capture audio/video devices, you first need to obtain a list of available devices and their labels (IDs).
 
-And when running `ffmpeg` to just get the devices list - it takes too long, because a lot of overhead actions are taken. Using this lib is much faster.
+And when running `ffmpeg` to just get the devices list - it takes too long, because a lot of overhead `ffmpeg` lib actions are taken.
+
+Using `media-devices-util` is much, much faster.
 
 ## How to use it
 
@@ -27,12 +29,20 @@ console.log({ audioDevices, videoDevices });
 // output on mac:
 // {
 //     audioDevices: [
-//         { id: '0', label: 'ZoomAudioDevice' },
-//         { id: '1', label: 'MacBook Pro Microphone' }
+//         {
+//             id: '0',
+//             label: 'MacBook Pro Microphone'
+//         }
 //     ],
 //     videoDevices: [
-//         { id: '0', label: 'FaceTime HD Camera (Built-in)' },
-//         { id: '1', label: 'Capture screen 0' }
+//         {
+//             id: '0',
+//             label: 'FaceTime HD Camera (Built-in)'
+//         },
+//         {
+//             id: '1',
+//             label: 'Capture screen 0'
+//         }
 //     ]
 // }
 //
@@ -40,18 +50,72 @@ console.log({ audioDevices, videoDevices });
 // {
 //     audioDevices: [
 //         {
-//             id: 'Microphone (High Definition Audio Device)',
-//             label: '@device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\\wave_{5CD1095F-7066-4597-B86B-D55F177403A3}'
+//             id: '@device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\\wave_{5CD1095F-7066-4597-B86B-D55F177403A3}',
+//             label: 'Microphone (High Definition Audio Device)'
 //         }
 //     ],
 //     videoDevices: [
 //         {
-//             id: 'FaceTime HD Camera (Built-in)',
-//             label: '@device_pnp_\\\\?\\usb#vid_203a&pid_fff9&mi_00#6&28ef9718&0&0000#{65e8773d-8f56-11d0-a3b9-00a0c9223196}\\global'
+//             id: '@device_pnp_\\\\?\\usb#vid_203a&pid_fff9&mi_00#6&28ef9718&0&0000#{65e8773d-8f56-11d0-a3b9-00a0c9223196}\\global',
+//             label: 'FaceTime HD Camera (Built-in)'
+//         },
+//         {
+//             id: '',
+//             label: 'screen-capture-recorder'
 //         }
 //     ]
 // }
 ```
+
+## API
+
+`media-devices-util` object has the following API:
+
+```typescript
+type TDevice = {
+  id: string;
+  label: string;
+}
+
+type TMediaDevicesUtil = {
+  getDefaultVideoDevice(): TDevice;
+  getDefaultAudioDevice(): TDevice;
+  getVideoDevices(): TDevice[];
+  getAudioDevices(): TDevice[];
+}
+```
+
+### getDefaultAudioDevice
+
+Supported platforms: `win`, `mac`
+
+Return type: `TDevice`
+
+Retrieve the default audio input device (microphone).
+
+### getDefaultVideoDevice
+
+Supported platforms: `win`
+
+Return type: `TDevice`
+
+Retrieve the default video input device (camera).
+
+### getVideoDevices
+
+Supported platforms: `win`, `mac`
+
+Return type: `TDevice[]`
+
+Retrieve the default video input devices list (cameras, screens, etc.).
+
+### getAudioDevices
+
+Supported platforms: `win`, `mac`
+
+Return type: `TDevice[]`
+
+Retrieve the default audio input devices list (microphones, virtual devices, etc.).
 
 ## Alternatives
 

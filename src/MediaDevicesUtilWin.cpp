@@ -10,7 +10,6 @@
 #include "ConverterUtil.h"
 
 // FIXME double-backslash issue
-// FIXME get_default_audio_device change ID to use alternative name
 class MediaDevicesUtilWin : public Napi::Addon<MediaDevicesUtilWin> {
     public:
         MediaDevicesUtilWin(Napi::Env env, Napi::Object exports) {
@@ -24,43 +23,45 @@ class MediaDevicesUtilWin : public Napi::Addon<MediaDevicesUtilWin> {
 
     protected:
         Napi::Value get_default_video_device(const Napi::CallbackInfo& info) {
-            Device defaultVideoDevice;
+            Device default_video_device;
 
             // TODO implement
 
-            return ConverterUtil::device_to_napi_object(defaultVideoDevice, info.Env());
+            return ConverterUtil::device_to_napi_object(default_video_device, info.Env());
         }
 
         Napi::Value get_default_audio_device(const Napi::CallbackInfo& info) {
-            Device defaultAudioDevice;
-            IMMDevice* device;
-            IMMDeviceEnumerator* enumerator;
-            IPropertyStore *pProps = NULL;
-            LPWSTR id;
-            PROPVARIANT label;
-            PropVariantInit(&label);
+            Device default_audio_device;
+            IMMDevice* mm_device;
+            IMMDeviceEnumerator* mm_device_enumerator;
+            IPropertyStore* props_store = NULL;
 
             if (
                 SUCCEEDED(CoInitializeEx(NULL, COINIT_MULTITHREADED))
-                && SUCCEEDED(CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_ALL, __uuidof(IMMDeviceEnumerator), (void**)&enumerator))
-                && SUCCEEDED(enumerator->GetDefaultAudioEndpoint(eCapture, eMultimedia, &device))
-                && SUCCEEDED(device->OpenPropertyStore(STGM_READ, &pProps))
+                && SUCCEEDED(CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_ALL, __uuidof(IMMDeviceEnumerator), (void**)&mm_device_enumerator))
+                && SUCCEEDED(mm_device_enumerator->GetDefaultAudioEndpoint(eCapture, eMultimedia, &mm_device))
+                && SUCCEEDED(mm_device->OpenPropertyStore(STGM_READ, &props_store))
             ) {
-                if (SUCCEEDED(device->GetId(&id))) {
-                    defaultAudioDevice.id = ConverterUtil::wchar_to_string(id);
+                LPWSTR id;
+                if (SUCCEEDED(mm_device->GetId(&id))) {
+                    default_audio_device.id = ConverterUtil::wchar_to_string(id);
                 }
 
-                if (SUCCEEDED(pProps->GetValue(PKEY_Device_FriendlyName, &label))) {
-                    defaultAudioDevice.label = ConverterUtil::wchar_to_string(label.pwszVal);
+                PROPVARIANT label;
+                PropVariantInit(&label);
+                if (SUCCEEDED(props_store->GetValue(PKEY_Device_FriendlyName, &label))) {
+                    default_audio_device.label = ConverterUtil::wchar_to_string(label.pwszVal);
+                    PropVariantClear(&label);
                 }
 
-                PropVariantClear(&label);
-                enumerator->Release();
-                device->Release();
+                // TODO also add alternative_name here?
+
+                mm_device_enumerator->Release();
+                mm_device->Release();
                 CoUninitialize();
             }
 
-            return ConverterUtil::device_to_napi_object(defaultAudioDevice, info.Env());
+            return ConverterUtil::device_to_napi_object(default_audio_device, info.Env());
         }
 
         Napi::Value get_video_devices(const Napi::CallbackInfo& info) {
@@ -81,68 +82,66 @@ class MediaDevicesUtilWin : public Napi::Addon<MediaDevicesUtilWin> {
                 return available_devices;
             }
 
-            IEnumMoniker *pEnum = NULL;
-            HRESULT hr = enumerate_devices(device_category, &pEnum);
-            if (!SUCCEEDED(hr)) {
+            IEnumMoniker* devices_enum_moniker = NULL;
+            HRESULT enumeration_result = enumerate_devices(device_category, &devices_enum_moniker);
+            if (!SUCCEEDED(enumeration_result)) {
                 return available_devices;
             }
 
-            IMoniker *pMoniker = NULL;
-            while (pEnum->Next(1, &pMoniker, NULL) == S_OK) {
-                IPropertyBag *pPropBag;
-                HRESULT hr = pMoniker->BindToStorage(0, 0, IID_PPV_ARGS(&pPropBag));
-                if (FAILED(hr)) {
-                    pMoniker->Release();
+            IMoniker *device_moniker = NULL;
+            while (devices_enum_moniker->Next(1, &device_moniker, NULL) == S_OK) {
+                IPropertyBag* device_properties_bag;
+                HRESULT h_result = device_moniker->BindToStorage(0, 0, IID_PPV_ARGS(&device_properties_bag));
+                if (FAILED(h_result)) {
+                    device_moniker->Release();
                     continue;
                 }
 
-                Device deviceToAdd = Device();
+                Device device_to_add;
 
-                IBindCtx *bind_ctx = NULL;
+                IBindCtx* bind_ctx = NULL;
                 LPOLESTR olestr = NULL;
                 if (
                     SUCCEEDED(CreateBindCtx(0, &bind_ctx))
-                    && SUCCEEDED(pMoniker->GetDisplayName(bind_ctx, NULL, &olestr))
+                    && SUCCEEDED(device_moniker->GetDisplayName(bind_ctx, NULL, &olestr))
                 ) {
-                    deviceToAdd.id = ConverterUtil::wchar_to_string(olestr);
+                    device_to_add.alternative_name = ConverterUtil::wchar_to_string(olestr);
                     // replace ':' with '_' since we use : to delineate between sources (the same as FFMPEG does)
-                    std::replace(deviceToAdd.id.begin(), deviceToAdd.id.end(), ':', '_');
+                    std::replace(device_to_add.alternative_name.begin(), device_to_add.alternative_name.end(), ':', '_');
                 }
 
-                VARIANT var;
-                VariantInit(&var);
-                hr = pPropBag->Read(L"FriendlyName", &var, 0);
-                if (SUCCEEDED(hr)) {
-                    deviceToAdd.label = ConverterUtil::wchar_to_string(var.bstrVal);
-                    VariantClear(&var);
+                VARIANT label_variant;
+                VariantInit(&label_variant);
+                if (SUCCEEDED(device_properties_bag->Read(L"FriendlyName", &label_variant, 0))) {
+                    device_to_add.label = ConverterUtil::wchar_to_string(label_variant.bstrVal);
+                    VariantClear(&label_variant);
                 }
 
-                available_devices.push_back(deviceToAdd);
+                available_devices.push_back(device_to_add);
 
-                pPropBag->Release();
-                pMoniker->Release();
+                device_properties_bag->Release();
+                device_moniker->Release();
             }
 
-            pEnum->Release();
-
+            devices_enum_moniker->Release();
             CoUninitialize();
 
             return available_devices;
         }
 
-        HRESULT enumerate_devices(REFGUID category, IEnumMoniker **ppEnum) {
+        HRESULT enumerate_devices(REFGUID category, IEnumMoniker** device_enum_moniker) {
             // create the System Device Enumerator
-            ICreateDevEnum *pDevEnum;
-            HRESULT hr = CoCreateInstance(CLSID_SystemDeviceEnum, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pDevEnum));
-            if (SUCCEEDED(hr)) {
+            ICreateDevEnum* dev_enum;
+            HRESULT h_result = CoCreateInstance(CLSID_SystemDeviceEnum, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&dev_enum));
+            if (SUCCEEDED(h_result)) {
                 // create an enumerator for the category
-                hr = pDevEnum->CreateClassEnumerator(category, ppEnum, 0);
-                if (hr == S_FALSE) {
-                    hr = VFW_E_NOT_FOUND;  // the category is empty, treat as an error
+                h_result = dev_enum->CreateClassEnumerator(category, device_enum_moniker, 0);
+                if (h_result == S_FALSE) {
+                    h_result = VFW_E_NOT_FOUND;  // the category is empty, treat as an error
                 }
-                pDevEnum->Release();
+                dev_enum->Release();
             }
-            return hr;
+            return h_result;
         }
 
 };

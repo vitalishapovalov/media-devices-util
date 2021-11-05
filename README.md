@@ -1,10 +1,10 @@
 # media-devices-util
 
 <a href="https://badge.fury.io/js/media-devices-util">
-  <img src="https://badge.fury.io/js/media-devices-util.svg">
+  <img src="https://img.shields.io/npm/v/media-devices-util?color=%2351c82c">
 </a>
 <a href="https://github.com/vitalishapovalov/media-devices-util/blob/master/LICENSE">
-  <img src="https://img.shields.io/github/license/vitalishapovalov/media-devices-util.svg">
+  <img src="https://img.shields.io/npm/l/media-devices-util?color=%2351c82c">
 </a>
 
 What is this package for? To get info about available media devices, so it can be passed then to other programs (e.g. use with `ffmpeg`, to provide input).
@@ -57,17 +57,16 @@ console.log({ audioDevices, videoDevices });
 // {
 //     audioDevices: [
 //         {
-//             id: '@device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\\wave_{5CD1095F-7066-4597-B86B-D55F177403A3}',
-//             label: 'Microphone (High Definition Audio Device)'
+//             label: 'Microphone (High Definition Audio Device)',
+//             alternativeName: '@device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\\wave_{5CD1095F-7066-4597-B86B-D55F177403A3}'
 //         }
 //     ],
 //     videoDevices: [
 //         {
-//             id: '@device_pnp_\\\\?\\usb#vid_203a&pid_fff9&mi_00#6&28ef9718&0&0000#{65e8773d-8f56-11d0-a3b9-00a0c9223196}\\global',
-//             label: 'FaceTime HD Camera (Built-in)'
+//             label: 'FaceTime HD Camera (Built-in)',
+//             alternativeName: '@device_pnp_\\\\?\\usb#vid_203a&pid_fff9&mi_00#6&28ef9718&0&0000#{65e8773d-8f56-11d0-a3b9-00a0c9223196}\\global'
 //         },
 //         {
-//             id: '',
 //             label: 'screen-capture-recorder'
 //         }
 //     ]
@@ -80,8 +79,9 @@ console.log({ audioDevices, videoDevices });
 
 ```typescript
 type TDevice = {
-  id: string;
   label: string;
+  id?: string;
+  alternativeName?: string; // only exists on windows
 }
 
 type TMediaDevicesUtil = {

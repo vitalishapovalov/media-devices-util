@@ -2,10 +2,15 @@ const test = require("tap").test;
 
 const mediaDevicesUtil = require("..");
 
+const isWin = process.platform === "win32";
+
 const verifyDeviceObject = (t, device) => {
     t.type(device, "object");
     t.type(device.id, "string");
     t.type(device.label, "string");
+    if (isWin) {
+        t.type(device.alternativeName, "string");
+    }
 };
 
 test("getDefaultAudioDevice - should return 'Device' object", (t) => {
@@ -18,26 +23,18 @@ test("getDefaultVideoDevice - should return 'Device' object", (t) => {
     t.end();
 });
 
-test("getVideoDevices - should return an Array", (t) => {
-    t.assert(Array.isArray(mediaDevicesUtil.getVideoDevices()));
-    t.end();
-});
-
-test("getAudioDevices - should return an Array", (t) => {
-    t.assert(Array.isArray(mediaDevicesUtil.getAudioDevices()));
-    t.end();
-});
-
-test("getVideoDevices - returned array should consist of 'Device' objects", (t) => {
+test("getVideoDevices - should return an Array of 'Device' objects", (t) => {
     const videoDevices = mediaDevicesUtil.getVideoDevices();
+    t.assert(Array.isArray(mediaDevicesUtil.getVideoDevices()));
     for (const videoDevice of videoDevices) {
         verifyDeviceObject(t, videoDevice);
     }
     t.end();
 });
 
-test("getAudioDevices - returned array should consist of 'Device' objects", (t) => {
+test("getAudioDevices - should return an Array of 'Device' objects", (t) => {
     const audioDevices = mediaDevicesUtil.getAudioDevices();
+    t.assert(Array.isArray(mediaDevicesUtil.getAudioDevices()));
     for (const audioDevice of audioDevices) {
         verifyDeviceObject(t, audioDevice);
     }

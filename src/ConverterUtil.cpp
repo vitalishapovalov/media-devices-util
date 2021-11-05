@@ -9,8 +9,15 @@
 
 Napi::Object ConverterUtil::device_to_napi_object(Device device, Napi::Env env) {
     Napi::Object wrapped_device = Napi::Object::New(env);
-    wrapped_device.Set("id", device.id);
-    wrapped_device.Set("label", device.label);
+    if (!device.id.empty()) {
+        wrapped_device.Set("id", device.id);
+    }
+    if (!device.label.empty()) {
+        wrapped_device.Set("label", device.label);
+    }
+    if (!device.alternative_name.empty()) {
+        wrapped_device.Set("alternativeName", device.alternative_name);
+    }
     return wrapped_device;
 }
 

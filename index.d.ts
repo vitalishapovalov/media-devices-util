@@ -1,6 +1,7 @@
 declare type TDevice = {
-  id: string;
   label: string;
+  id?: string;
+  alternativeName?: string;
 }
 
 declare type TMediaDevicesUtil = {

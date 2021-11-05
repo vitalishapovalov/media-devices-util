@@ -100,6 +100,8 @@ Return type: `TDevice`
 
 Retrieve the default audio input device (microphone).
 
+For `win` - prefer using `label` instead of `id` for `ffmpeg -f dshow`.
+
 #### getDefaultVideoDevice
 
 Supported platforms: `win`

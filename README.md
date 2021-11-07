@@ -88,7 +88,7 @@ type TDevice = {
 }
 
 type TMediaDevicesUtil = {
-  getDefaultVideoDevice(): TDevice;
+  getDefaultVideoDevice(): TDevice | null;  // returns null on windows
   getDefaultAudioDevice(): TDevice;
   getVideoDevices(): TDevice[];
   getAudioDevices(): TDevice[];
@@ -107,9 +107,9 @@ Retrieve the default audio input device (microphone).
 
 Supported platforms: `mac`
 
-Return type: `TDevice`
+Return type: `TDevice | null`
 
-Retrieve the default video input device (camera).
+Retrieve the default video input device (camera). Returns `null` on Windows.
 
 #### getVideoDevices
 

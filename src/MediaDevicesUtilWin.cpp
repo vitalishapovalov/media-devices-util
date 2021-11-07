@@ -22,12 +22,9 @@ class MediaDevicesUtilWin : public Napi::Addon<MediaDevicesUtilWin> {
         }
 
     protected:
+        // not supported on win; placeholder method to avoid throwing
         Napi::Value get_default_video_device(const Napi::CallbackInfo& info) {
-            Device default_video_device;
-
-            // TODO implement
-
-            return ConverterUtil::device_to_napi_object(default_video_device, info.Env());
+            return info.Env().Null();
         }
 
         Napi::Value get_default_audio_device(const Napi::CallbackInfo& info) {
@@ -42,11 +39,6 @@ class MediaDevicesUtilWin : public Napi::Addon<MediaDevicesUtilWin> {
                 && SUCCEEDED(mm_device_enumerator->GetDefaultAudioEndpoint(eCapture, eMultimedia, &mm_device))
                 && SUCCEEDED(mm_device->OpenPropertyStore(STGM_READ, &props_store))
             ) {
-                LPWSTR id;
-                if (SUCCEEDED(mm_device->GetId(&id))) {
-                    default_audio_device.id = ConverterUtil::wchar_to_string(id);
-                }
-
                 PROPVARIANT label;
                 PropVariantInit(&label);
                 if (SUCCEEDED(props_store->GetValue(PKEY_Device_FriendlyName, &label))) {
@@ -54,7 +46,12 @@ class MediaDevicesUtilWin : public Napi::Addon<MediaDevicesUtilWin> {
                     PropVariantClear(&label);
                 }
 
-                // TODO also add alternative_name here?
+                std::vector<Device> dshow_audio_devices = fill_devices_list(CLSID_AudioInputDeviceCategory);
+                for (Device audio_device : dshow_audio_devices) {
+                    if (audio_device.label == default_audio_device.label) {
+                        default_audio_device.alternative_name = audio_device.alternative_name;
+                    }
+                }
 
                 mm_device_enumerator->Release();
                 mm_device->Release();

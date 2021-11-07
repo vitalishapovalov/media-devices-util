@@ -82,8 +82,8 @@ console.log({ audioDevices, videoDevices });
 
 ```typescript
 type TDevice = {
-  label: string;
-  id?: string;
+  label: string;            // available on mac and windows, can be used for ffmpeg input
+  id?: string;              // only exists on mac
   alternativeName?: string; // only exists on windows
 }
 
@@ -102,8 +102,6 @@ Supported platforms: `win`, `mac`
 Return type: `TDevice`
 
 Retrieve the default audio input device (microphone).
-
-For `win` - prefer using `label` instead of `id` for `ffmpeg -f dshow`.
 
 #### getDefaultVideoDevice
 

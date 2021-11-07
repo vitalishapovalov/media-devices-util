@@ -42,7 +42,7 @@
   ],
   "dependencies": {
     "node-addon-api": "4.2.0",
-    "node-gyp-build": "4.2.0"
+    "node-gyp-build": "4.3.0"
   },
   "devDependencies": {
     "ava": "^3.15.0",

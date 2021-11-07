@@ -105,7 +105,7 @@ Retrieve the default audio input device (microphone).
 
 #### getDefaultVideoDevice
 
-Supported platforms: `win`
+Supported platforms: `mac`
 
 Return type: `TDevice`
 

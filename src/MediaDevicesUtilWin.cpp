@@ -100,12 +100,12 @@ class MediaDevicesUtilWin : public Napi::Addon<MediaDevicesUtilWin> {
                 Device device_to_add;
 
                 IBindCtx* bind_ctx = NULL;
-                LPOLESTR olestr = NULL;
+                LPOLESTR alternative_name_olestr = NULL;
                 if (
                     SUCCEEDED(CreateBindCtx(0, &bind_ctx))
-                    && SUCCEEDED(device_moniker->GetDisplayName(bind_ctx, NULL, &olestr))
+                    && SUCCEEDED(device_moniker->GetDisplayName(bind_ctx, NULL, &alternative_name_olestr))
                 ) {
-                    device_to_add.alternative_name = ConverterUtil::wchar_to_string(olestr);
+                    device_to_add.alternative_name = ConverterUtil::wchar_to_string(alternative_name_olestr);
                     // replace ':' with '_' since we use : to delineate between sources (the same as FFMPEG does)
                     std::replace(device_to_add.alternative_name.begin(), device_to_add.alternative_name.end(), ':', '_');
                 }

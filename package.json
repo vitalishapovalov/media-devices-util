@@ -36,6 +36,10 @@
     "get default device"
   ],
   "gypfile": true,
+  "os": [
+    "win32",
+    "darwin"
+  ],
   "dependencies": {
     "node-addon-api": "4.2.0",
     "node-gyp-build": "4.2.0"

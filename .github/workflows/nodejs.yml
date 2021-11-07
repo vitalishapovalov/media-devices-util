@@ -1,0 +1,25 @@
+name: Node CI (Windows/MacOS)
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+        node-version: [14.x, 16.x]
+    steps:
+      - uses: actions/checkout@v1
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: npm install
+        run: npm i
+      - name: npm build and test
+        run: |
+          npm run prebuild
+          npm test
+        env:
+          CI: true

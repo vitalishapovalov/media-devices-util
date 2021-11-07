@@ -1,5 +1,6 @@
 .idea
 .nyc_output
+.github/
 test/
 build/
 build-pre-gyp/

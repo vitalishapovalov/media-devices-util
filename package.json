@@ -20,7 +20,7 @@
     "prebuild-darwin-x64": "prebuildify -t 16.13.0 -t electron@15.3.0 --napi --strip --arch x64 --platform darwin",
     "prebuild-darwin-x64+arm64": "prebuildify -t 16.13.0 -t electron@15.3.0 --napi --strip --arch x64+arm64 --platform darwin",
     "prebuild-win32-x64": "prebuildify -t 16.13.0 -t electron@15.3.0 --napi --strip --platform win32",
-    "test": "tap"
+    "test": "ava"
   },
   "keywords": [
     "ffmpeg",
@@ -45,7 +45,7 @@
     "node-gyp-build": "4.2.0"
   },
   "devDependencies": {
-    "prebuildify": "4.2.1",
-    "tap": "^15.0.10"
+    "ava": "^3.15.0",
+    "prebuildify": "4.2.1"
   }
 }

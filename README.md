@@ -4,6 +4,9 @@
   <a href="https://badge.fury.io/js/media-devices-util">
     <img src="https://img.shields.io/npm/v/media-devices-util?color=%2351c82c">
   </a>
+  <a href="https://github.com/vitalishapovalov/media-devices-util">
+    <img src="https://github.com/vitalishapovalov/media-devices-util/actions/workflows/nodejs.yml/badge.svg">
+  </a>
   <img src="https://img.shields.io/badge/os-Windows%20%7C%20MacOS-success">
   <a href="https://github.com/vitalishapovalov/media-devices-util/blob/master/LICENSE">
     <img src="https://img.shields.io/npm/l/media-devices-util?color=%2351c82c">

@@ -1,7 +1,7 @@
-#include <vector>
-#include <string>
 #include <locale>
 #include <sstream>
+#include <vector>
+#include <string>
 #include <napi.h>
 
 #include "Device.h"

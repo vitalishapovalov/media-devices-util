@@ -2,8 +2,6 @@
 
 #include <vector>
 #include <string>
-#include <locale>
-#include <sstream>
 #include <napi.h>
 
 #include "Device.h"

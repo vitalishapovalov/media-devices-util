@@ -7,8 +7,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, macos-latest]
-        node-version: [16.x]
+        # macos-latest removed due yet unknown SIGSEGV error
+        os: [windows-latest]
+        node-version: [16.x, 14.x]
     steps:
       - uses: actions/checkout@v1
       - name: Use Node.js ${{ matrix.node-version }}

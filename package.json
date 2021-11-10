@@ -46,6 +46,6 @@
   },
   "devDependencies": {
     "ava": "^3.15.0",
-    "prebuildify": "4.2.1"
+    "prebuildify": "5.0.0"
   }
 }

@@ -1,11 +1,11 @@
 declare type TDevice = {
+  id: string;
   label: string;
-  id?: string;
   alternativeName?: string;
 }
 
 declare type TMediaDevicesUtil = {
-  getDefaultVideoDevice(): TDevice | null;
+  getDefaultVideoDevice(): TDevice;
   getDefaultAudioDevice(): TDevice;
   getVideoDevices(): TDevice[];
   getAudioDevices(): TDevice[];

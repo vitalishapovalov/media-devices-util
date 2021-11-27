@@ -2,11 +2,12 @@
 
 #include "Device.h"
 
-Device::Device() {
-}
+Device::Device() { }
 
-Device::Device(int i, std::string l, std::string a) {
-    id = std::to_string(i);
-    label = l;
-    alternative_name = a;
-}
+Device::Device(
+    const std::string& d_id,
+    const std::string& d_label,
+    const std::string& d_alternative_name
+): id(d_id),
+   label(d_label),
+   alternative_name(d_alternative_name) { }

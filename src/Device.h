@@ -2,11 +2,16 @@
 
 #include <string>
 
-struct Device {
-    std::string id;
-    std::string label;
-    std::string alternative_name;
+class Device {
+    public:
+        std::string id;
+        std::string label;
+        std::string alternative_name;
 
-    Device();
-    Device(int i, std::string l = "", std::string a = "");
+        Device();
+        explicit Device(
+            const std::string& d_id,
+            const std::string& d_label = std::string(),
+            const std::string& d_alternative_name = std::string()
+        );
 };

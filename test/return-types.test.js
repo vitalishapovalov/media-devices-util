@@ -12,26 +12,17 @@ const verifyDeviceObject = (t, device) => {
 
     // CI will have no devices at all, so we're expecting empty results
     const deviceFieldType = isCI ? "undefined" : "string";
+    t.is(typeof device.id, deviceFieldType);
     t.is(typeof device.label, deviceFieldType);
     // windows doesn't have an ID, only alternative name
     if (isWin) {
         t.is(typeof device.alternativeName, deviceFieldType);
-    } else {
-        t.is(typeof device.id, deviceFieldType);
     }
 };
 
-if (isMac) {
-    test("getDefaultVideoDevice - should return 'Device' object", (t) => {
-        verifyDeviceObject(t, mediaDevicesUtil.getDefaultVideoDevice());
-    });
-}
-
-if (isWin) {
-    test("getDefaultVideoDevice - should return null", (t) => {
-        t.is(mediaDevicesUtil.getDefaultVideoDevice(), null);
-    });
-}
+test("getDefaultVideoDevice - should return 'Device' object", (t) => {
+    verifyDeviceObject(t, mediaDevicesUtil.getDefaultVideoDevice());
+});
 
 test("getDefaultAudioDevice - should return 'Device' object", (t) => {
     verifyDeviceObject(t, mediaDevicesUtil.getDefaultAudioDevice());

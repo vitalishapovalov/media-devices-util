@@ -7,12 +7,14 @@
 #include <Functiondiscoverykeys_devpkey.h>
 
 #include "Device.h"
+#include "StringUtil.h"
 #include "ConverterUtil.h"
+#include "DefaultAudioDeviceWin.h"
 
 // FIXME double-backslash issue
 class MediaDevicesUtilWin : public Napi::Addon<MediaDevicesUtilWin> {
     public:
-        MediaDevicesUtilWin(Napi::Env env, Napi::Object exports) {
+        MediaDevicesUtilWin(const Napi::Env& env, const Napi::Object& exports) {
             DefineAddon(exports, {
                 InstanceMethod("getVideoDevices", &MediaDevicesUtilWin::get_video_devices),
                 InstanceMethod("getAudioDevices", &MediaDevicesUtilWin::get_audio_devices),
@@ -22,57 +24,34 @@ class MediaDevicesUtilWin : public Napi::Addon<MediaDevicesUtilWin> {
         }
 
     protected:
-        // not supported on win; placeholder method to avoid throwing
         Napi::Value get_default_video_device(const Napi::CallbackInfo& info) {
-            return info.Env().Null();
+            Device default_video_device = get_devices(CLSID_VideoInputDeviceCategory).front();
+            return ConverterUtil::device_to_napi_object(default_video_device, info.Env());
         }
 
         Napi::Value get_default_audio_device(const Napi::CallbackInfo& info) {
-            Device default_audio_device;
-            IMMDevice* mm_device;
-            IMMDeviceEnumerator* mm_device_enumerator;
-            IPropertyStore* props_store = NULL;
-
-            if (
-                SUCCEEDED(CoInitializeEx(NULL, COINIT_MULTITHREADED))
-                && SUCCEEDED(CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_ALL, __uuidof(IMMDeviceEnumerator), (void**)&mm_device_enumerator))
-                && SUCCEEDED(mm_device_enumerator->GetDefaultAudioEndpoint(eCapture, eMultimedia, &mm_device))
-                && SUCCEEDED(mm_device->OpenPropertyStore(STGM_READ, &props_store))
-            ) {
-                PROPVARIANT label;
-                PropVariantInit(&label);
-                if (SUCCEEDED(props_store->GetValue(PKEY_Device_FriendlyName, &label))) {
-                    default_audio_device.label = ConverterUtil::wchar_to_string(label.pwszVal);
-                    PropVariantClear(&label);
+            DefaultAudioDeviceWin default_audio_device_win;
+            std::vector<Device> dshow_audio_devices = get_devices(CLSID_AudioInputDeviceCategory);
+            for (const auto& audio_device : dshow_audio_devices) {
+                if (audio_device.label == default_audio_device_win.friendly_name) {
+                    return ConverterUtil::device_to_napi_object(audio_device, info.Env());
                 }
-
-                std::vector<Device> dshow_audio_devices = fill_devices_list(CLSID_AudioInputDeviceCategory);
-                for (Device audio_device : dshow_audio_devices) {
-                    if (audio_device.label == default_audio_device.label) {
-                        default_audio_device.alternative_name = audio_device.alternative_name;
-                    }
-                }
-
-                mm_device_enumerator->Release();
-                mm_device->Release();
-                CoUninitialize();
             }
-
-            return ConverterUtil::device_to_napi_object(default_audio_device, info.Env());
+            return Napi::Object::New(info.Env());
         }
 
         Napi::Value get_video_devices(const Napi::CallbackInfo& info) {
-            std::vector<Device> video_devices_vector = fill_devices_list(CLSID_VideoInputDeviceCategory);
-            return ConverterUtil::devices_vector_to_napi_arr(video_devices_vector, info.Env());
+            std::vector<Device> video_devices = get_devices(CLSID_VideoInputDeviceCategory);
+            return ConverterUtil::devices_vector_to_napi_arr(video_devices, info.Env());
         }
 
         Napi::Value get_audio_devices(const Napi::CallbackInfo& info) {
-            std::vector<Device> audio_devices_vector = fill_devices_list(CLSID_AudioInputDeviceCategory);
-            return ConverterUtil::devices_vector_to_napi_arr(audio_devices_vector, info.Env());
+            std::vector<Device> audio_devices = get_devices(CLSID_AudioInputDeviceCategory);
+            return ConverterUtil::devices_vector_to_napi_arr(audio_devices, info.Env());
         }
 
     private:
-        std::vector<Device> fill_devices_list(const GUID device_category) {
+        std::vector<Device> get_devices(REFGUID device_category) {
             std::vector<Device> available_devices;
 
             if (!SUCCEEDED(CoInitializeEx(NULL, COINIT_MULTITHREADED))) {
@@ -102,7 +81,7 @@ class MediaDevicesUtilWin : public Napi::Addon<MediaDevicesUtilWin> {
                     SUCCEEDED(CreateBindCtx(0, &bind_ctx))
                     && SUCCEEDED(device_moniker->GetDisplayName(bind_ctx, NULL, &alternative_name_olestr))
                 ) {
-                    device_to_add.alternative_name = ConverterUtil::wchar_to_string(alternative_name_olestr);
+                    device_to_add.alternative_name = StringUtil::wchar_to_string(alternative_name_olestr);
                     // replace ':' with '_' since we use : to delineate between sources (the same as FFMPEG does)
                     std::replace(device_to_add.alternative_name.begin(), device_to_add.alternative_name.end(), ':', '_');
                 }
@@ -110,9 +89,22 @@ class MediaDevicesUtilWin : public Napi::Addon<MediaDevicesUtilWin> {
                 VARIANT label_variant;
                 VariantInit(&label_variant);
                 if (SUCCEEDED(device_properties_bag->Read(L"FriendlyName", &label_variant, 0))) {
-                    device_to_add.label = ConverterUtil::wchar_to_string(label_variant.bstrVal);
-                    VariantClear(&label_variant);
+                    device_to_add.label = StringUtil::wchar_to_string(label_variant.bstrVal);
                 }
+                VariantClear(&label_variant);
+
+                VARIANT id_variant;
+                VariantInit(&id_variant);
+                if (CLSID_AudioInputDeviceCategory == device_category) {
+                    if (SUCCEEDED(device_properties_bag->Read(L"WaveInID", &id_variant, 0))) {
+                        device_to_add.id = std::to_string(id_variant.lVal);
+                    }
+                } else if (CLSID_VideoInputDeviceCategory== device_category) {
+                    if (SUCCEEDED(device_properties_bag->Read(L"DevicePath", &id_variant, 0))) {
+                        device_to_add.id = StringUtil::wchar_to_string(id_variant.bstrVal);
+                    }
+                }
+                VariantClear(&id_variant);
 
                 available_devices.push_back(device_to_add);
 
@@ -126,15 +118,13 @@ class MediaDevicesUtilWin : public Napi::Addon<MediaDevicesUtilWin> {
             return available_devices;
         }
 
-        HRESULT enumerate_devices(REFGUID category, IEnumMoniker** device_enum_moniker) {
-            // create the System Device Enumerator
+        HRESULT enumerate_devices(REFGUID device_category, IEnumMoniker** device_enum_moniker) {
             ICreateDevEnum* dev_enum;
             HRESULT h_result = CoCreateInstance(CLSID_SystemDeviceEnum, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&dev_enum));
             if (SUCCEEDED(h_result)) {
-                // create an enumerator for the category
-                h_result = dev_enum->CreateClassEnumerator(category, device_enum_moniker, 0);
+                h_result = dev_enum->CreateClassEnumerator(device_category, device_enum_moniker, 0);
                 if (h_result == S_FALSE) {
-                    h_result = VFW_E_NOT_FOUND;  // the category is empty, treat as an error
+                    h_result = VFW_E_NOT_FOUND;  // the device_category is empty, treat as an error
                 }
                 dev_enum->Release();
             }

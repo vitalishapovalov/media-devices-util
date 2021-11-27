@@ -6,7 +6,8 @@
         ],
         "sources": [
           "./src/Device.cpp",
-          "./src/ConverterUtil.cpp"
+          "./src/ConverterUtil.cpp",
+          "./src/StringUtil.cpp"
         ],
         "conditions": [
             ["OS == 'mac'", {
@@ -26,13 +27,11 @@
                     "OTHER_CPLUSPLUSFLAGS": [
                         "-mmacosx-version-min=10.8",
                         "-stdlib=libc++",
-                        "-arch x86_64",
-                        "-arch arm64"
+                        "-arch x86_64"
                     ],
                     "OTHER_LDFLAGS": [
                         "-stdlib=libc++",
-                        "-arch x86_64",
-                        "-arch arm64"
+                        "-arch x86_64"
                     ],
                     "GCC_ENABLE_CPP_EXCEPTIONS": "YES",
                     "CLANG_CXX_LIBRARY": "libc++",
@@ -46,6 +45,7 @@
             }],
             ["OS == 'win'", {
                 "sources": [
+                  "./src/DefaultAudioDeviceWin.cpp",
                   "./src/MediaDevicesUtilWin.cpp"
                 ],
                 "defines": [

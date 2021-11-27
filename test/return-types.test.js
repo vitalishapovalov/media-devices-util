@@ -46,6 +46,5 @@ if (isWin) {
 } else {
     console.log(mediaDevicesUtil.getVideoDevices());
     console.log(mediaDevicesUtil.getAudioDevices());
-    console.log(mediaDevicesUtil.getDefaultAudioDevice());
     console.log(mediaDevicesUtil.getDefaultVideoDevice());
 }

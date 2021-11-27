@@ -19,11 +19,9 @@ const verifyDeviceObject = (t, device) => {
     }
 };
 
-if (!isWin) {
-    test("getDefaultAudioDevice - should return 'Device' object", (t) => {
-        verifyDeviceObject(t, mediaDevicesUtil.getDefaultAudioDevice());
-    });
-}
+test("getDefaultAudioDevice - should return 'Device' object", (t) => {
+    verifyDeviceObject(t, mediaDevicesUtil.getDefaultAudioDevice());
+});
 
 test("getDefaultVideoDevice - should return 'Device' object", (t) => {
     verifyDeviceObject(t, mediaDevicesUtil.getDefaultVideoDevice());

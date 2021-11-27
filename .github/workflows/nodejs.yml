@@ -7,8 +7,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        # macos-latest removed due yet unknown SIGSEGV error
-        os: [windows-latest]
+        os: [windows-latest, macos-latest]
         node-version: [16.x, 14.x]
     steps:
       - uses: actions/checkout@v1

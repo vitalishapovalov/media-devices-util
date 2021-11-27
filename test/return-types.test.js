@@ -28,8 +28,8 @@ if (!isWin) {
         verifyDeviceObject(t, mediaDevicesUtil.getDefaultAudioDevice());
     });
 } else {
-    console.log(mediaDevicesUtil.getDefaultVideoDevice());
-    console.log(mediaDevicesUtil.getDefaultAudioDevice());
+    console.log(mediaDevicesUtil.getAudioDevices());
+    console.log(mediaDevicesUtil.getVideoDevices());
 }
 
 test("getVideoDevices - should return an Array of 'Device' objects", (t) => {

@@ -20,11 +20,17 @@ class MediaDevicesUtilMac : public Napi::Addon<MediaDevicesUtilMac> {
     protected:
         Napi::Value get_default_video_device(const Napi::CallbackInfo& info) {
             const AVCaptureDevice* device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+            if (!device) {
+                return Napi::Object::New(info.Env());
+            }
             return ConverterUtil::device_to_napi_object(map_avdevice_to_device(device), info.Env());
         }
 
         Napi::Value get_default_audio_device(const Napi::CallbackInfo& info) {
             const AVCaptureDevice* device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeAudio];
+            if (!device) {
+                return Napi::Object::New(info.Env());
+            }
             return ConverterUtil::device_to_napi_object(map_avdevice_to_device(device), info.Env());
         }
 

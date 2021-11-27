@@ -19,32 +19,26 @@ const verifyDeviceObject = (t, device) => {
     }
 };
 
-if (isWin) {
-    test("getDefaultAudioDevice - should return 'Device' object", (t) => {
-        verifyDeviceObject(t, mediaDevicesUtil.getDefaultAudioDevice());
-    });
-    
-    test("getDefaultVideoDevice - should return 'Device' object", (t) => {
-        verifyDeviceObject(t, mediaDevicesUtil.getDefaultVideoDevice());
-    });
-    
-    test("getVideoDevices - should return an Array of 'Device' objects", (t) => {
-        const videoDevices = mediaDevicesUtil.getVideoDevices();
-        t.assert(Array.isArray(videoDevices));
-        for (const videoDevice of videoDevices) {
-            verifyDeviceObject(t, videoDevice);
-        }
-    });
-    
-    test("getAudioDevices - should return an Array of 'Device' objects", (t) => {
-        const audioDevices = mediaDevicesUtil.getAudioDevices();
-        t.assert(Array.isArray(audioDevices));
-        for (const audioDevice of audioDevices) {
-            verifyDeviceObject(t, audioDevice);
-        }
-    });
-} else {
-    console.log(mediaDevicesUtil.getVideoDevices());
-    console.log(mediaDevicesUtil.getAudioDevices());
-    console.log(mediaDevicesUtil.getDefaultVideoDevice());
-}
+test("getDefaultAudioDevice - should return 'Device' object", (t) => {
+    verifyDeviceObject(t, mediaDevicesUtil.getDefaultAudioDevice());
+});
+
+test("getDefaultVideoDevice - should return 'Device' object", (t) => {
+    verifyDeviceObject(t, mediaDevicesUtil.getDefaultVideoDevice());
+});
+
+test("getVideoDevices - should return an Array of 'Device' objects", (t) => {
+    const videoDevices = mediaDevicesUtil.getVideoDevices();
+    t.assert(Array.isArray(videoDevices));
+    for (const videoDevice of videoDevices) {
+        verifyDeviceObject(t, videoDevice);
+    }
+});
+
+test("getAudioDevices - should return an Array of 'Device' objects", (t) => {
+    const audioDevices = mediaDevicesUtil.getAudioDevices();
+    t.assert(Array.isArray(audioDevices));
+    for (const audioDevice of audioDevices) {
+        verifyDeviceObject(t, audioDevice);
+    }
+});

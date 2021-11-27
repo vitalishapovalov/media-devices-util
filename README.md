@@ -12,6 +12,7 @@
     <img src="https://github.com/vitalishapovalov/media-devices-util/actions/workflows/nodejs.yml/badge.svg">
   </a>
 </div>
+<br />
 
 What is this package for? To get info about available media devices, so it can be passed then to other programs (e.g. use with `ffmpeg`, to provide input).
 
@@ -57,7 +58,7 @@ console.log({ audioDevices, videoDevices });
 // {
 //     audioDevices: [
 //         {
-//             id: '',
+//             id: '0',
 //             label: 'Microphone (High Definition Audio Device)',
 //             alternativeName: '@device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\\wave_{B073E9D3-C0A7-4CB0-84E0-F829B281F95F}'
 //         }

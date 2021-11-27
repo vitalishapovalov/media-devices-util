@@ -44,6 +44,7 @@ if (!isWin) {
         }
     });
 } else {
+    console.log(mediaDevicesUtil.getVideoDevices());
     test("dummy", (t) => {
         t.is(true, true);
     });

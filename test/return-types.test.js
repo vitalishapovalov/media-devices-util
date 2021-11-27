@@ -43,4 +43,8 @@ if (!isWin) {
             verifyDeviceObject(t, audioDevice);
         }
     });
+} else {
+    test("dummy", (t) => {
+        t.is(true, true);
+    });
 }

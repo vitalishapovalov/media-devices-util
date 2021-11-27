@@ -182,3 +182,9 @@ Also, you can use other `ffmpeg` command abstractions (like [ffmpeg](https://www
 In any case, the `list_devices` in `ffmpeg` lib is something like a crunch, and the lib itself doesn't provide a [programmatic way to enumerate devices](https://trac.ffmpeg.org/wiki/DirectShow#Howtoprogrammaticallyenumeratedevices).
 
 Or use other [ffmpeg nodejs bindings lib](https://github.com/Streampunk/beamcoder).
+
+## Next Steps
+
+- Fix the double-backslash Napi issue
+- Add device permissions checkers
+- Add listeners for devices/permissions

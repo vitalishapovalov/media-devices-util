@@ -17,7 +17,7 @@ class MediaDevicesUtilMac : public Napi::Addon<MediaDevicesUtilMac> {
             });
         }
 
-    protected:
+    private:
         Napi::Value get_default_video_device(const Napi::CallbackInfo& info) {
             const AVCaptureDevice* device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
             if (!device) {
@@ -77,7 +77,6 @@ class MediaDevicesUtilMac : public Napi::Addon<MediaDevicesUtilMac> {
             return ConverterUtil::devices_vector_to_napi_arr(available_devices, info.Env());
         }
 
-    private:
         Device map_avdevice_to_device(const AVCaptureDevice* avdevice) {
             std::string uniquie_id([[avdevice uniqueID] UTF8String]);
             std::string localized_name([[avdevice localizedName] UTF8String]);

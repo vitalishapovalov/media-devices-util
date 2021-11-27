@@ -11,7 +11,6 @@
 #include "ConverterUtil.h"
 #include "DefaultAudioDeviceWin.h"
 
-// FIXME double-backslash issue
 class MediaDevicesUtilWin : public Napi::Addon<MediaDevicesUtilWin> {
     public:
         MediaDevicesUtilWin(const Napi::Env& env, const Napi::Object& exports) {
@@ -23,7 +22,7 @@ class MediaDevicesUtilWin : public Napi::Addon<MediaDevicesUtilWin> {
             });
         }
 
-    protected:
+    private:
         Napi::Value get_default_video_device(const Napi::CallbackInfo& info) {
             std::vector<Device> video_devices = get_devices(CLSID_VideoInputDeviceCategory);
             if (video_devices.empty()) {
@@ -53,7 +52,6 @@ class MediaDevicesUtilWin : public Napi::Addon<MediaDevicesUtilWin> {
             return ConverterUtil::devices_vector_to_napi_arr(audio_devices, info.Env());
         }
 
-    private:
         std::vector<Device> get_devices(REFGUID device_category) {
             std::vector<Device> available_devices;
 

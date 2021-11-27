@@ -2,18 +2,17 @@ const test = require("ava");
 
 const mediaDevicesUtil = require("..");
 
-const isCI = process.env.CI === "true";
 const isWin = process.platform === "win32";
 
 const verifyDeviceObject = (t, device) => {
     // device itself should always be an object
     t.is(typeof device, "object");
 
-    // CI will have no devices at all, so we're expecting empty results
-    const deviceFieldType = isCI ? "undefined" : "string";
+    // if we have zero keys - means that something went wrong and we expect no info at all
+    const deviceFieldType = Object.keys(device).length ? "string" : "undefined";
+
     t.is(typeof device.id, deviceFieldType);
     t.is(typeof device.label, deviceFieldType);
-    // windows doesn't have an ID, only alternative name
     if (isWin) {
         t.is(typeof device.alternativeName, deviceFieldType);
     }

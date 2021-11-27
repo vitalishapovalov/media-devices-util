@@ -4,7 +4,6 @@ const mediaDevicesUtil = require("..");
 
 const isCI = process.env.CI === "true";
 const isWin = process.platform === "win32";
-const isMac = process.platform === "darwin";
 
 const verifyDeviceObject = (t, device) => {
     // device itself should always be an object
@@ -24,9 +23,9 @@ test("getDefaultVideoDevice - should return 'Device' object", (t) => {
     verifyDeviceObject(t, mediaDevicesUtil.getDefaultVideoDevice());
 });
 
-test("getDefaultAudioDevice - should return 'Device' object", (t) => {
-    verifyDeviceObject(t, mediaDevicesUtil.getDefaultAudioDevice());
-});
+//test("getDefaultAudioDevice - should return 'Device' object", (t) => {
+//    verifyDeviceObject(t, mediaDevicesUtil.getDefaultAudioDevice());
+//});
 
 test("getVideoDevices - should return an Array of 'Device' objects", (t) => {
     const videoDevices = mediaDevicesUtil.getVideoDevices();

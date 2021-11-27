@@ -34,7 +34,7 @@ class MediaDevicesUtilWin : public Napi::Addon<MediaDevicesUtilWin> {
 
         Napi::Value get_default_audio_device(const Napi::CallbackInfo& info) {
             DefaultAudioDeviceWin default_audio_device_win;
-            if (!default_audio_device_win.friendly_name) {
+            if (default_audio_device_win.friendly_name.empty()) {
                 return Napi::Object::New(info.Env());
             }
             std::vector<Device> dshow_audio_devices = get_devices(CLSID_AudioInputDeviceCategory);

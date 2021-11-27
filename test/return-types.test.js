@@ -19,26 +19,28 @@ const verifyDeviceObject = (t, device) => {
     }
 };
 
-test("getDefaultVideoDevice - should return 'Device' object", (t) => {
-    verifyDeviceObject(t, mediaDevicesUtil.getDefaultVideoDevice());
-});
-
-//test("getDefaultAudioDevice - should return 'Device' object", (t) => {
-//    verifyDeviceObject(t, mediaDevicesUtil.getDefaultAudioDevice());
-//});
-
-test("getVideoDevices - should return an Array of 'Device' objects", (t) => {
-    const videoDevices = mediaDevicesUtil.getVideoDevices();
-    t.assert(Array.isArray(mediaDevicesUtil.getVideoDevices()));
-    for (const videoDevice of videoDevices) {
-        verifyDeviceObject(t, videoDevice);
-    }
-});
-
-test("getAudioDevices - should return an Array of 'Device' objects", (t) => {
-    const audioDevices = mediaDevicesUtil.getAudioDevices();
-    t.assert(Array.isArray(mediaDevicesUtil.getAudioDevices()));
-    for (const audioDevice of audioDevices) {
-        verifyDeviceObject(t, audioDevice);
-    }
-});
+if (!isWin) {
+    test("getDefaultVideoDevice - should return 'Device' object", (t) => {
+        verifyDeviceObject(t, mediaDevicesUtil.getDefaultVideoDevice());
+    });
+    
+    test("getDefaultAudioDevice - should return 'Device' object", (t) => {
+        verifyDeviceObject(t, mediaDevicesUtil.getDefaultAudioDevice());
+    });
+    
+    test("getVideoDevices - should return an Array of 'Device' objects", (t) => {
+        const videoDevices = mediaDevicesUtil.getVideoDevices();
+        t.assert(Array.isArray(mediaDevicesUtil.getVideoDevices()));
+        for (const videoDevice of videoDevices) {
+            verifyDeviceObject(t, videoDevice);
+        }
+    });
+    
+    test("getAudioDevices - should return an Array of 'Device' objects", (t) => {
+        const audioDevices = mediaDevicesUtil.getAudioDevices();
+        t.assert(Array.isArray(mediaDevicesUtil.getAudioDevices()));
+        for (const audioDevice of audioDevices) {
+            verifyDeviceObject(t, audioDevice);
+        }
+    });
+}

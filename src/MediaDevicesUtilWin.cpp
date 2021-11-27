@@ -25,8 +25,11 @@ class MediaDevicesUtilWin : public Napi::Addon<MediaDevicesUtilWin> {
 
     protected:
         Napi::Value get_default_video_device(const Napi::CallbackInfo& info) {
-            Device default_video_device = get_devices(CLSID_VideoInputDeviceCategory).front();
-            return ConverterUtil::device_to_napi_object(default_video_device, info.Env());
+            std::vector<Device> video_devices = get_devices(CLSID_VideoInputDeviceCategory);
+            if (video_devices.empty()) {
+                return Napi::Object::New(info.Env());
+            }
+            return ConverterUtil::device_to_napi_object(video_devices.front(), info.Env());
         }
 
         Napi::Value get_default_audio_device(const Napi::CallbackInfo& info) {

@@ -24,7 +24,7 @@ DefaultAudioDeviceWin::DefaultAudioDeviceWin() {
     if (!SUCCEEDED(mm_device->OpenPropertyStore(STGM_READ, &props_store))) {
         return;
     }
-    
+
     PROPVARIANT friendly_name_variant;
     PropVariantInit(&friendly_name_variant);
     if (SUCCEEDED(props_store->GetValue(PKEY_Device_FriendlyName, &friendly_name_variant))) {

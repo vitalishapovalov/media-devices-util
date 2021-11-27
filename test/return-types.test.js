@@ -30,7 +30,7 @@ if (isWin) {
     
     test("getVideoDevices - should return an Array of 'Device' objects", (t) => {
         const videoDevices = mediaDevicesUtil.getVideoDevices();
-        t.assert(Array.isArray(mediaDevicesUtil.getVideoDevices()));
+        t.assert(Array.isArray(videoDevices));
         for (const videoDevice of videoDevices) {
             verifyDeviceObject(t, videoDevice);
         }
@@ -38,7 +38,7 @@ if (isWin) {
     
     test("getAudioDevices - should return an Array of 'Device' objects", (t) => {
         const audioDevices = mediaDevicesUtil.getAudioDevices();
-        t.assert(Array.isArray(mediaDevicesUtil.getAudioDevices()));
+        t.assert(Array.isArray(audioDevices));
         for (const audioDevice of audioDevices) {
             verifyDeviceObject(t, audioDevice);
         }
@@ -46,5 +46,5 @@ if (isWin) {
 } else {
     console.log(mediaDevicesUtil.getVideoDevices());
     console.log(mediaDevicesUtil.getAudioDevices());
-    console.log(mediaDevicesUtil.getDefaultAudioDevice());
+    console.log(mediaDevicesUtil.getDefaultVideoDevice());
 }

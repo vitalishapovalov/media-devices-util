@@ -1,6 +1,6 @@
 {
   "name": "media-devices-util",
-  "version": "0.1.0",
+  "version": "0.1.1-SNAPSHOT",
   "description": "This package exposes and API to get info about mac/win media devices",
   "main": "index.js",
   "types": "index.d.ts",

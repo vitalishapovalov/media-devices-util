@@ -1,7 +1,7 @@
 {
   "name": "media-devices-util",
-  "version": "0.1.2-SNAPSHOT",
-  "description": "This package exposes and API to get info about mac/win media devices",
+  "version": "0.2.0-SNAPSHOT",
+  "description": "This package exposes and API to work with mac/win media devices (cameras, microphones, screens)",
   "main": "index.js",
   "types": "index.d.ts",
   "license": "MIT",

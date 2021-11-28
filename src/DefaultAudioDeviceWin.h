@@ -1,11 +1,11 @@
 #pragma once
 
-#include <string>
 #include <Mmdeviceapi.h>
+#include <string>
 
 class DefaultAudioDeviceWin {
     private:
-        bool is_initialized;
+        bool is_initialized = false;
         IMMDevice* mm_device = NULL;
         IMMDeviceEnumerator* mm_device_enumerator = NULL;
         IPropertyStore* props_store = NULL;

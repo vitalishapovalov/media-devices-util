@@ -2,13 +2,13 @@
               if ((punk) != NULL)  \
                 { (punk)->Release(); (punk) = NULL; }
 
-#include <windows.h>
-#include <dshow.h>
-#include <Mmdeviceapi.h>
 #include <Functiondiscoverykeys_devpkey.h>
+#include <Mmdeviceapi.h>
+#include <dshow.h>
+#include <windows.h>
 
-#include "StringUtil.h"
 #include "DefaultAudioDeviceWin.h"
+#include "StringUtil.h"
 
 DefaultAudioDeviceWin::DefaultAudioDeviceWin() {
     is_initialized = SUCCEEDED(CoInitializeEx(NULL, COINIT_MULTITHREADED));

@@ -5,8 +5,9 @@
           "<!@(node -p \"require('node-addon-api').include\")"
         ],
         "sources": [
+          "./src/Authorization.cpp",
           "./src/Device.cpp",
-          "./src/ConverterUtil.cpp",
+          "./src/NapiUtil.cpp",
           "./src/StringUtil.cpp"
         ],
         "conditions": [
@@ -25,7 +26,7 @@
                         "-Wno-ignored-qualifiers"
                     ],
                     "OTHER_CPLUSPLUSFLAGS": [
-                        "-mmacosx-version-min=10.8",
+                        "-mmacosx-version-min=10.14",
                         "-stdlib=libc++",
                         "-arch x86_64"
                     ],
@@ -35,11 +36,13 @@
                     ],
                     "GCC_ENABLE_CPP_EXCEPTIONS": "YES",
                     "CLANG_CXX_LIBRARY": "libc++",
-                    "MACOSX_DEPLOYMENT_TARGET": "10.8"
+                    "MACOSX_DEPLOYMENT_TARGET": "10.14"
                 },
                 "link_settings": {
                     "libraries": [
-                        "-framework AVFoundation"
+                        "-framework AppKit",
+                        "-framework AVFoundation",
+                        "-framework CoreGraphics"
                     ]
                 }
             }],

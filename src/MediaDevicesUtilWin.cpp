@@ -6,6 +6,7 @@
 #include <vector>
 #include <windows.h>
 
+#include "Authorization.h"
 #include "DefaultAudioDeviceWin.h"
 #include "Device.h"
 #include "NapiUtil.h"
@@ -110,7 +111,6 @@ Napi::Value get_default_audio_device(const Napi::CallbackInfo& info) {
     return Napi::Object::New(info.Env());
 }
 
-// TODO add screens option?
 Napi::Value get_video_devices(const Napi::CallbackInfo& info) {
     std::vector<Device> video_devices = get_devices(CLSID_VideoInputDeviceCategory);
     return NapiUtil::devices_vector_to_napi_arr(video_devices, info.Env());
@@ -121,24 +121,26 @@ Napi::Value get_audio_devices(const Napi::CallbackInfo& info) {
     return NapiUtil::devices_vector_to_napi_arr(audio_devices, info.Env());
 }
 
-// TODO implement
+// there are no specific permissions on windows
 Napi::Value get_screen_authorization_status(const Napi::CallbackInfo& info) {
-    return info.Env().Undefined();
+    return Authorization(true).to_napi_string();
 }
-
-// TODO implement
 Napi::Value get_media_authorization_status(const Napi::CallbackInfo& info) {
-    return info.Env().Undefined();
+    if (info.Length() > 0 && info[0].IsString()) {
+        return Authorization(true).to_napi_string();
+    }
+    Napi::Object authorization_obj = Napi::Object::New(env);
+    authorization_obj.Set(CAMERA, Authorization(true).to_napi_string(env));
+    authorization_obj.Set(MICROPHONE, Authorization(true).to_napi_string(env));
+    return authorization_obj;
 }
-
-// TODO implement
 Napi::Value request_screen_authorization(const Napi::CallbackInfo& info) {
-    return info.Env().Undefined();
+    return Authorization(true).to_napi_string();
 }
-
-// TODO implement
 Napi::Value request_media_authorization(const Napi::CallbackInfo& info) {
-    return info.Env().Undefined();
+    Napi::Promise::Deferred deferred = Napi::Promise::Deferred::New(info.Env());
+    deferred.Resolve(Authorization(true).to_napi_string());
+    return deferred.Promise();
 }
 
 Napi::Object Init(Napi::Env env, Napi::Object exports) {

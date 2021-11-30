@@ -29,21 +29,5 @@ Napi::Array NapiUtil::devices_vector_to_napi_arr(const std::vector<Device>& devi
 }
 
 Napi::Value NapiUtil::dummy_napi_fn(const Napi::CallbackInfo& info) {
-  return info.Env().Undefined();
-}
-
-bool NapiUtil::is_first_arg_string(const Napi::CallbackInfo& info) {
-    return info.Length() > 0 && info[0].IsString();
-}
-
-bool NapiUtil::is_first_arg_bool(const Napi::CallbackInfo& info) {
-    return info.Length() > 0 && info[0].IsBoolean();
-}
-
-std::string NapiUtil::get_first_arg_string(const Napi::CallbackInfo& info) {
-    return info[0].As<Napi::String>().ToString().Utf8Value();
-}
-
-bool NapiUtil::get_first_arg_bool(const Napi::CallbackInfo& info) {
-    return info[0].ToBoolean().Value();
+    return info.Env().Undefined();
 }

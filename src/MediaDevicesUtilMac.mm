@@ -8,10 +8,11 @@
 #include "Authorization.h"
 #include "Device.h"
 #include "NapiUtil.h"
+#include "StringUtil.h"
 
-const std::string CAMERA = "camera";
-const std::string MICROPHONE = "microphone";
-const std::string CAPTURE_SCREEN_PREFIX = "Capture screen ";
+const std::string CAMERA("camera");
+const std::string MICROPHONE("microphone");
+const std::string CAPTURE_SCREEN_PREFIX("Capture screen ");
 
 Device map_avdevice_to_device(const AVCaptureDevice* avdevice) {
     std::string unique_id([[avdevice uniqueID] UTF8String]);
@@ -53,9 +54,7 @@ Napi::Value get_default_audio_device(const Napi::CallbackInfo& info) {
 
 Napi::Value get_video_devices(const Napi::CallbackInfo& info) {
     uint32_t screens_count = 0;
-    if (NapiUtil::is_first_arg_bool(info) && NapiUtil::get_first_arg_bool(info)) {
-        CGGetActiveDisplayList(0, NULL, &screens_count);
-    }
+    CGGetActiveDisplayList(0, NULL, &screens_count);
 
     NSArray* devices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
     NSArray* devices_muxed = [AVCaptureDevice devicesWithMediaType:AVMediaTypeMuxed];
@@ -99,8 +98,8 @@ Napi::Value get_screen_authorization_status(const Napi::CallbackInfo& info) {
     if (@available(macOS 11.0, *)) {
         authorization.set_authorized(CGPreflightScreenCaptureAccess());
     } else if (@available(macOS 10.15, *)) {
-        NSRunningApplication* current_application = NSRunningApplication.currentApplication;
-        NSNumber* current_process_id = [NSNumber numberWithInteger:current_application.processIdentifier];
+        NSRunningApplication* current_app = NSRunningApplication.currentApplication;
+        NSNumber* current_process_id = [NSNumber numberWithInteger:current_app.processIdentifier];
         CFArrayRef window_list = CGWindowListCopyWindowInfo(kCGWindowListOptionAll, kCGNullWindowID);
         int windows_count = CFArrayGetCount(window_list);
         for (int index = 0; index < windows_count; index++) {
@@ -112,9 +111,9 @@ Napi::Value get_screen_authorization_status(const Napi::CallbackInfo& info) {
             if (![process_id isEqual:current_process_id]) {
                 // get process information for each window
                 pid_t pid = process_id.intValue;
-                NSRunningApplication* running_application = [NSRunningApplication runningApplicationWithProcessIdentifier:pid];
-                if (running_application) {
-                    NSString* executable = running_application.executableURL.lastPathComponent;
+                NSRunningApplication* running_app = [NSRunningApplication runningApplicationWithProcessIdentifier:pid];
+                if (running_app) {
+                    NSString* executable = running_app.executableURL.lastPathComponent;
                     if (window_name && ![executable isEqual:@"Dock"]) {
                         authorization.set_authorized(true);
                         break;
@@ -133,8 +132,8 @@ Napi::Value get_screen_authorization_status(const Napi::CallbackInfo& info) {
 Napi::Value get_media_authorization_status(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
 
-    if (NapiUtil::is_first_arg_string(info)) {
-        std::string media_category = NapiUtil::get_first_arg_string(info);
+    if (info.Length() > 0 && info[0].IsString()) {
+        std::string media_category = StringUtil::napi_value_to_string(info[0]);
         return get_authorization(media_category).to_napi_string(env);
     }
 
@@ -175,25 +174,24 @@ Napi::Value request_media_authorization(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
     Napi::Promise::Deferred deferred = Napi::Promise::Deferred::New(env);
 
-    if (!NapiUtil::is_first_arg_string(info)) {
+    if (info.Length() < 0 || !info[0].IsString()) {
         deferred.Resolve(env.Undefined());
         return deferred.Promise();
     }
 
     Authorization authorization;
-    Napi::ThreadSafeFunction thread_safe_fn = Napi::ThreadSafeFunction::New(env, Napi::Function::New(env, NapiUtil::dummy_napi_fn), "callback", 0, 1);
+    Napi::ThreadSafeFunction thread_safe_fn = Napi::ThreadSafeFunction::New(env,
+        Napi::Function::New(env, NapiUtil::dummy_napi_fn), "callback", 0, 1);
     if (@available(macOS 10.14, *)) {
-        std::string media_category = NapiUtil::get_first_arg_string(info);
-        bool is_camera_capture = CAMERA == media_category;
-        bool is_microphone_capture = MICROPHONE == media_category;
-        if (!is_camera_capture && !is_microphone_capture) {
+        std::string media_category = StringUtil::napi_value_to_string(info[0]);
+        if (CAMERA != media_category && MICROPHONE != media_category) {
             deferred.Resolve(env.Undefined());
             return deferred.Promise();
         }
 
-        const AVMediaType media_type = is_camera_capture ? AVMediaTypeVideo : AVMediaTypeAudio;
+        const AVMediaType media_type = CAMERA == media_category ? AVMediaTypeVideo : AVMediaTypeAudio;
         Authorization current_authorization = get_authorization(media_category);
-        if (Authorization::NOT_DETERMINED == current_authorization.to_string()) {
+        if (current_authorization.is_not_determined()) {
             __block Napi::ThreadSafeFunction tsf = thread_safe_fn;
             [AVCaptureDevice requestAccessForMediaType:media_type completionHandler: ^(BOOL granted) {
                 auto callback = [=](Napi::Env env, Napi::Function js_cb, const std::string& authorization_string) {
@@ -202,11 +200,12 @@ Napi::Value request_media_authorization(const Napi::CallbackInfo& info) {
                 tsf.BlockingCall(granted ? "AUTHORIZED" : "DENIED", callback);
                 tsf.Release();
             }];
-        } else if (Authorization::DENIED == current_authorization.to_string()) {
+        } else if (current_authorization.is_denied()) {
             NSWorkspace* workspace = [[NSWorkspace alloc] init];
             NSString* media_permissions_url =
                 @"x-apple.systempreferences:com.apple.preference."
-                @"security?Privacy_Camera";
+                @"security?"
+                CAMERA == media_category ? @"Privacy_Camera" : @"Privacy_Microphone";
             [workspace openURL:[NSURL URLWithString:media_permissions_url]];
             thread_safe_fn.Release();
             authorization.set_authorized(false);

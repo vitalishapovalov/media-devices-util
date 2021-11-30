@@ -14,7 +14,11 @@
 </div>
 <br />
 
-What is this package for? To get info about available media devices, so it can be passed then to other programs (e.g. use with `ffmpeg`, to provide input).
+What is this package for? To get info about available media devices and work with them. You can:
+- list available devices
+- get default devices
+- get audio/video/screen permissions (`mac`)
+- request for audio/video/screen permissions (`mac`)
 
 ## How to use it
 
@@ -25,6 +29,8 @@ npm i -S media-devices-util
 ```
 
 ### Use
+
+#### Get devices list
 
 ```javascript
 const mediaDevicesUtil = require("media-devices-util");
@@ -73,6 +79,18 @@ console.log({ audioDevices, videoDevices });
 // }
 ```
 
+#### Request for Camera permissions
+
+```javascript
+const mediaDevicesUtil = require("media-devices-util");
+
+mediaDevicesUtil.requestMediaAuthorization("camera").then((status) => {
+  if ("AUTHORIZED" === status) {
+    // permissions granted!
+  }
+});
+```
+
 ### API
 
 `media-devices-util` object has the following API:
@@ -99,13 +117,38 @@ type TDevice = {
   alternativeName?: string;
 }
 
+// AUTHORIZED - permissions granted
+// DENIED - permissions denied
+// NOT_DETERMINED - permissions not set
+declare type TAuthorization = "AUTHORIZED" | "DENIED" | "NOT_DETERMINED";
+
+declare type TMediaType = "camera" | "microphone";
+
 type TMediaDevicesUtil = {
-  getDefaultVideoDevice(): TDevice;
-  getDefaultAudioDevice(): TDevice;
-  getVideoDevices(): TDevice[];
-  getAudioDevices(): TDevice[];
+    getDefaultVideoDevice(): TDevice;
+    getDefaultAudioDevice(): TDevice;
+    getVideoDevices(): TDevice[];
+    getAudioDevices(): TDevice[];
+    getScreenAuthorizationStatus(): TAuthorization;
+    getMediaAuthorizationStatus(mediaType: TMediaType): TAuthorization;
+    getMediaAuthorizationStatus(): {
+        camera: TAuthorization;
+        microphone: TAuthorization;
+    };
+    requestScreenAuthorization(): TAuthorization;
+    requestMediaAuthorization(mediaType: TMediaType): Promise<TAuthorization>;
 }
 ```
+
+#### getDefaultVideoDevice
+
+Return type: `TDevice`
+
+Retrieve the default video input device (camera).
+
+For `win`, taking the first entry of the [`IEnumMoniker`](https://docs.microsoft.com/en-us/windows/win32/api/objidl/nn-objidl-ienummoniker) with the `CLSID_VideoInputDeviceCategory` parameter.
+
+For `mac`, using the [`defaultDeviceWithMediaType:AVMediaTypeVideo`](https://developer.apple.com/documentation/avfoundation/avcapturedevice/1386589-defaultdevicewithmediatype) method for audio/video devices.
 
 #### getDefaultAudioDevice
 
@@ -117,15 +160,6 @@ For `win`, using the [`GetDefaultAudioEndpoint`](https://docs.microsoft.com/en-u
 
 For `mac`, using the [`defaultDeviceWithMediaType:AVMediaTypeAudio`](https://developer.apple.com/documentation/avfoundation/avcapturedevice/1386589-defaultdevicewithmediatype) method.
 
-#### getDefaultVideoDevice
-
-Return type: `TDevice | null`
-
-Retrieve the default video input device (camera).
-
-For `win`, taking the first entry of the [`IEnumMoniker`](https://docs.microsoft.com/en-us/windows/win32/api/objidl/nn-objidl-ienummoniker) with the `CLSID_VideoInputDeviceCategory` parameter.
-
-For `mac`, using the [`defaultDeviceWithMediaType:AVMediaTypeVideo`](https://developer.apple.com/documentation/avfoundation/avcapturedevice/1386589-defaultdevicewithmediatype) method for audio/video devices.
 
 #### getVideoDevices
 
@@ -146,6 +180,50 @@ Retrieve the default audio input devices list (microphones, virtual devices, etc
 For `mac`, using the [`devicesWithMediaType:AVMediaTypeAudio`](https://developer.apple.com/documentation/avfoundation/avcapturedevice/1390520-deviceswithmediatype) method.
 
 For `win`, using the [`IEnumMoniker`](https://docs.microsoft.com/en-us/windows/win32/api/objidl/nn-objidl-ienummoniker) with the `CLSID_AudioInputDeviceCategory` parameter.
+
+#### getScreenAuthorizationStatus
+
+Return type: `TAuthorization`
+
+Retrieve current permissions for screen recording.
+
+For `mac`, using the [`CGPreflightScreenCaptureAccess`](https://developer.apple.com/documentation/coregraphics/3656523-cgpreflightscreencaptureaccess) method (`>=11.0`), or will try to match window processes ids (`>=10.15`), or will return `AUTHORIZED`.
+
+For `win`, will always return `AUTHORIZED`.
+
+#### getMediaAuthorizationStatus
+
+Return type: `TAuthorization | { camera: TAuthorization; microphone: TAuthorization; }`
+
+Arguments: `(mediaType?: TMediaType)`
+
+Retrieve current permissions for audio and/or video usage. If no args passed - will return authorization status for both audio/video.
+
+For `mac`, using the [`authorizationStatusForMediaType`](https://developer.apple.com/documentation/avfoundation/avcapturedevice/1624613-authorizationstatusformediatype) method.
+
+For `win`, will always return `AUTHORIZED` for any type of media.
+
+#### requestScreenAuthorization
+
+Return type: `TAuthorization`
+
+Request for screen recording permissions. Will prompt user to modify screen recording permissions config, if possible, otherwise - will open the `System Preferences` window with `Screen Recording` tab opened.
+
+For `mac`, using the [`CGRequestScreenCaptureAccess`](https://developer.apple.com/documentation/coregraphics/3656524-cgrequestscreencaptureaccess) method (`>=11.0`), or will try to use [`CGDisplayStreamCreate`](https://developer.apple.com/documentation/coregraphics/1455170-cgdisplaystreamcreate) method (`>=10.15`), or will return `AUTHORIZED`.
+
+For `win`, will always return `AUTHORIZED`.
+
+#### requestMediaAuthorization
+
+Return type: `Promise<TAuthorization>`
+
+Arguments: `(mediaType: TMediaType)`
+
+Request for microphone or camera recording permissions. Will prompt user to modify screen recording permissions config, if possible, otherwise - will open the `System Preferences` window with `Camera` or `Microphone` tab opened.
+
+For `mac`, using the [`requestAccessForMediaType`](https://developer.apple.com/documentation/avfoundation/avcapturedevice/1624584-requestaccessformediatype) method (`>=10.14`), or will return `AUTHORIZED`.
+
+For `win`, will always return `AUTHORIZED` for any type of media.
 
 ## FFMPEG
 

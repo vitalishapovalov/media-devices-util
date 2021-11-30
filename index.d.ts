@@ -11,7 +11,7 @@ declare type TMediaType = "camera" | "microphone";
 declare type TMediaDevicesUtil = {
   getDefaultVideoDevice(): TDevice;
   getDefaultAudioDevice(): TDevice;
-  getVideoDevices(screens?: boolean): TDevice[];
+  getVideoDevices(): TDevice[];
   getAudioDevices(): TDevice[];
   getScreenAuthorizationStatus(): TAuthorization;
   getMediaAuthorizationStatus(mediaType: TMediaType): TAuthorization;

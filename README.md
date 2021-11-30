@@ -265,3 +265,7 @@ Or use other [ffmpeg nodejs bindings lib](https://github.com/Streampunk/beamcode
 
 - Improve Windows API (especially permissions), if possible
 - Add listeners for devices and/or permissions
+
+## License
+
+[MIT License](LICENSE)

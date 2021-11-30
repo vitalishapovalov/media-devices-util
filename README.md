@@ -263,6 +263,5 @@ Or use other [ffmpeg nodejs bindings lib](https://github.com/Streampunk/beamcode
 
 ## Next Steps
 
-- Fix the double-backslash Napi issue
-- Add device permissions checkers
-- Add listeners for devices/permissions
+- Improve Windows API (especially permissions), if possible
+- Add listeners for devices and/or permissions

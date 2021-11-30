@@ -7,11 +7,8 @@
 
 #include "Authorization.h"
 #include "Device.h"
-#include "NapiUtil.h"
 #include "StringUtil.h"
 
-const std::string CAMERA("camera");
-const std::string MICROPHONE("microphone");
 const std::string CAPTURE_SCREEN_PREFIX("Capture screen ");
 
 Device map_avdevice_to_device(const AVCaptureDevice* avdevice) {
@@ -25,16 +22,18 @@ Napi::Object get_default_device(const AVMediaType media_type, const Napi::Env& e
     if (!device) {
         return Napi::Object::New(env);
     }
-    return NapiUtil::device_to_napi_object(map_avdevice_to_device(device), env);
+    return map_avdevice_to_device(device).to_napi_object(env);
 }
 
 Authorization get_authorization(const std::string& media_category) {
     Authorization authorization;
-    if (CAMERA != media_category && MICROPHONE != media_category) {
+    if (!Authorization::category_exists(media_category)) {
         return authorization;
     }
 
-    const AVMediaType media_type = CAMERA == media_category ? AVMediaTypeVideo : AVMediaTypeAudio;
+    const AVMediaType media_type = Authorization::CAMERA_CATEGORY == media_category
+        ? AVMediaTypeVideo
+        : AVMediaTypeAudio;
     const AVAuthorizationStatus auth_status = [AVCaptureDevice authorizationStatusForMediaType:media_type];
     if (AVAuthorizationStatusAuthorized == auth_status) {
         authorization.set_authorized(true);
@@ -77,7 +76,7 @@ Napi::Value get_video_devices(const Napi::CallbackInfo& info) {
         }
     }
 
-    return NapiUtil::devices_vector_to_napi_arr(available_devices, info.Env());
+    return Device::devices_vector_to_napi_arr(available_devices, info.Env());
 }
 
 Napi::Value get_audio_devices(const Napi::CallbackInfo& info) {
@@ -89,7 +88,7 @@ Napi::Value get_audio_devices(const Napi::CallbackInfo& info) {
         available_devices.push_back(map_avdevice_to_device(device));
     }
 
-    return NapiUtil::devices_vector_to_napi_arr(available_devices, info.Env());
+    return Device::devices_vector_to_napi_arr(available_devices, info.Env());
 }
 
 Napi::Value get_screen_authorization_status(const Napi::CallbackInfo& info) {
@@ -138,8 +137,10 @@ Napi::Value get_media_authorization_status(const Napi::CallbackInfo& info) {
     }
 
     Napi::Object authorization_obj = Napi::Object::New(env);
-    authorization_obj.Set(CAMERA, get_authorization(CAMERA).to_napi_string(env));
-    authorization_obj.Set(MICROPHONE, get_authorization(MICROPHONE).to_napi_string(env));
+    authorization_obj.Set(Authorization::CAMERA_CATEGORY,
+        get_authorization(Authorization::CAMERA_CATEGORY).to_napi_string(env));
+    authorization_obj.Set(Authorization::MICROPHONE_CATEGORY,
+        get_authorization(Authorization::MICROPHONE_CATEGORY).to_napi_string(env));
     return authorization_obj;
 }
 
@@ -162,8 +163,7 @@ Napi::Value request_screen_authorization(const Napi::CallbackInfo& info) {
     if (!authorization.is_authorized()) {
         NSWorkspace* workspace = [[NSWorkspace alloc] init];
         NSString* screen_permissions_url =
-            @"x-apple.systempreferences:com.apple.preference."
-            @"security?Privacy_ScreenCapture";
+            @"x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture";
         [workspace openURL:[NSURL URLWithString:screen_permissions_url]];
     }
 
@@ -181,15 +181,17 @@ Napi::Value request_media_authorization(const Napi::CallbackInfo& info) {
 
     Authorization authorization;
     Napi::ThreadSafeFunction thread_safe_fn = Napi::ThreadSafeFunction::New(env,
-        Napi::Function::New(env, NapiUtil::dummy_napi_fn), "callback", 0, 1);
+        Napi::Function::New(env, [](const Napi::CallbackInfo& info){}), "callback", 0, 1);
     if (@available(macOS 10.14, *)) {
         std::string media_category = StringUtil::napi_value_to_string(info[0]);
-        if (CAMERA != media_category && MICROPHONE != media_category) {
+        if (!Authorization::category_exists(media_category)) {
             deferred.Resolve(env.Undefined());
             return deferred.Promise();
         }
 
-        const AVMediaType media_type = CAMERA == media_category ? AVMediaTypeVideo : AVMediaTypeAudio;
+        const AVMediaType media_type = Authorization::CAMERA_CATEGORY == media_category
+            ? AVMediaTypeVideo
+            : AVMediaTypeAudio;
         Authorization current_authorization = get_authorization(media_category);
         if (current_authorization.is_not_determined()) {
             __block Napi::ThreadSafeFunction tsf = thread_safe_fn;
@@ -204,7 +206,7 @@ Napi::Value request_media_authorization(const Napi::CallbackInfo& info) {
             NSWorkspace* workspace = [[NSWorkspace alloc] init];
             NSString* media_permissions_url =
                 [NSString stringWithFormat:@"x-apple.systempreferences:com.apple.preference.security?%@",
-                          CAMERA == media_category ? @"Privacy_Camera" : @"Privacy_Microphone"];
+                          Authorization::CAMERA_CATEGORY == media_category ? @"Privacy_Camera" : @"Privacy_Microphone"];
             [workspace openURL:[NSURL URLWithString:media_permissions_url]];
             thread_safe_fn.Release();
             authorization.set_authorized(false);

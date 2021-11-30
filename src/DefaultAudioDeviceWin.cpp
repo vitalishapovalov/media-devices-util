@@ -2,8 +2,8 @@
               if ((punk) != NULL)  \
                 { (punk)->Release(); (punk) = NULL; }
 
-#include <Functiondiscoverykeys_devpkey.h>
 #include <Mmdeviceapi.h>
+#include <Functiondiscoverykeys_devpkey.h>
 #include <dshow.h>
 #include <windows.h>
 

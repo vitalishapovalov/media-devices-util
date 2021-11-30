@@ -6,6 +6,12 @@
 const std::string Authorization::AUTHORIZED("AUTHORIZED");
 const std::string Authorization::DENIED("DENIED");
 const std::string Authorization::NOT_DETERMINED("NOT_DETERMINED");
+const std::string Authorization::CAMERA_CATEGORY("camera");
+const std::string Authorization::MICROPHONE_CATEGORY("microphone");
+
+bool Authorization::category_exists(const std::string& category) {
+    return Authorization::CAMERA_CATEGORY == category || Authorization::MICROPHONE_CATEGORY == category;
+}
 
 Authorization::Authorization(): _authorized(false), _authorization_set(false) {
 }
@@ -19,15 +25,15 @@ void Authorization::set_authorized(bool authorized) {
 }
 
 bool Authorization::is_authorized() {
-    return to_string() == AUTHORIZED;
+    return Authorization::AUTHORIZED == to_string();
 }
 
 bool Authorization::is_not_determined() {
-    return to_string() == NOT_DETERMINED;
+    return Authorization::NOT_DETERMINED == to_string();
 }
 
 bool Authorization::is_denied() {
-    return to_string() == DENIED;
+    return Authorization::DENIED == to_string();
 }
 
 std::string Authorization::to_string() {

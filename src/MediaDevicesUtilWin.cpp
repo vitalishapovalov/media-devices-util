@@ -1,5 +1,5 @@
-#include <Functiondiscoverykeys_devpkey.h>
 #include <Mmdeviceapi.h>
+#include <Functiondiscoverykeys_devpkey.h>
 #include <dshow.h>
 #include <napi.h>
 #include <string>
@@ -9,7 +9,6 @@
 #include "Authorization.h"
 #include "DefaultAudioDeviceWin.h"
 #include "Device.h"
-#include "NapiUtil.h"
 #include "StringUtil.h"
 
 HRESULT enumerate_devices(REFGUID device_category, IEnumMoniker** device_enum_moniker) {
@@ -97,7 +96,7 @@ Napi::Value get_default_video_device(const Napi::CallbackInfo& info) {
     if (video_devices.empty()) {
         return Napi::Object::New(info.Env());
     }
-    return NapiUtil::device_to_napi_object(video_devices.front(), info.Env());
+    return video_devices.front().to_napi_object(info.Env());
 }
 
 Napi::Value get_default_audio_device(const Napi::CallbackInfo& info) {
@@ -105,7 +104,7 @@ Napi::Value get_default_audio_device(const Napi::CallbackInfo& info) {
     std::vector<Device> dshow_audio_devices = get_devices(CLSID_AudioInputDeviceCategory);
     for (const auto& audio_device : dshow_audio_devices) {
         if (audio_device.label == default_audio_device_win.friendly_name) {
-            return NapiUtil::device_to_napi_object(audio_device, info.Env());
+            return audio_device.to_napi_object(info.Env());
         }
     }
     return Napi::Object::New(info.Env());
@@ -113,33 +112,33 @@ Napi::Value get_default_audio_device(const Napi::CallbackInfo& info) {
 
 Napi::Value get_video_devices(const Napi::CallbackInfo& info) {
     std::vector<Device> video_devices = get_devices(CLSID_VideoInputDeviceCategory);
-    return NapiUtil::devices_vector_to_napi_arr(video_devices, info.Env());
+    return Device::devices_vector_to_napi_arr(video_devices, info.Env());
 }
 
 Napi::Value get_audio_devices(const Napi::CallbackInfo& info) {
     std::vector<Device> audio_devices = get_devices(CLSID_AudioInputDeviceCategory);
-    return NapiUtil::devices_vector_to_napi_arr(audio_devices, info.Env());
+    return Device::devices_vector_to_napi_arr(audio_devices, info.Env());
 }
 
 // there are no specific permissions on windows
 Napi::Value get_screen_authorization_status(const Napi::CallbackInfo& info) {
-    return Authorization(true).to_napi_string();
+    return Napi::String::New(info.Env(), Authorization::AUTHORIZED);
 }
 Napi::Value get_media_authorization_status(const Napi::CallbackInfo& info) {
     if (info.Length() > 0 && info[0].IsString()) {
-        return Authorization(true).to_napi_string();
+        return Napi::String::New(info.Env(), Authorization::AUTHORIZED);
     }
-    Napi::Object authorization_obj = Napi::Object::New(env);
-    authorization_obj.Set(CAMERA, Authorization(true).to_napi_string(env));
-    authorization_obj.Set(MICROPHONE, Authorization(true).to_napi_string(env));
+    Napi::Object authorization_obj = Napi::Object::New(info.Env());
+    authorization_obj.Set(Authorization::CAMERA_CATEGORY, Napi::String::New(info.Env(), Authorization::AUTHORIZED));
+    authorization_obj.Set(Authorization::MICROPHONE_CATEGORY, Napi::String::New(info.Env(), Authorization::AUTHORIZED));
     return authorization_obj;
 }
 Napi::Value request_screen_authorization(const Napi::CallbackInfo& info) {
-    return Authorization(true).to_napi_string();
+    return Napi::String::New(info.Env(), Authorization::AUTHORIZED);
 }
 Napi::Value request_media_authorization(const Napi::CallbackInfo& info) {
     Napi::Promise::Deferred deferred = Napi::Promise::Deferred::New(info.Env());
-    deferred.Resolve(Authorization(true).to_napi_string());
+    deferred.Resolve(Napi::String::New(info.Env(), Authorization::AUTHORIZED));
     return deferred.Promise();
 }
 

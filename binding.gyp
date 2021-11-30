@@ -7,7 +7,6 @@
         "sources": [
           "./src/Authorization.cpp",
           "./src/Device.cpp",
-          "./src/NapiUtil.cpp",
           "./src/StringUtil.cpp"
         ],
         "conditions": [

@@ -23,6 +23,10 @@
     "test": "ava"
   },
   "keywords": [
+    "avfoundation",
+    "media permissions",
+    "camera permissions",
+    "microphone permissions",
     "ffmpeg",
     "ffmpeg-devices",
     "media devices",

@@ -203,9 +203,8 @@ Napi::Value request_media_authorization(const Napi::CallbackInfo& info) {
         } else if (current_authorization.is_denied()) {
             NSWorkspace* workspace = [[NSWorkspace alloc] init];
             NSString* media_permissions_url =
-                @"x-apple.systempreferences:com.apple.preference."
-                @"security?"
-                CAMERA == media_category ? @"Privacy_Camera" : @"Privacy_Microphone";
+                [NSString stringWithFormat:@"x-apple.systempreferences:com.apple.preference.security?%@",
+                          CAMERA == media_category ? @"Privacy_Camera" : @"Privacy_Microphone"];
             [workspace openURL:[NSURL URLWithString:media_permissions_url]];
             thread_safe_fn.Release();
             authorization.set_authorized(false);

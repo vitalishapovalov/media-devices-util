@@ -50,6 +50,6 @@
   },
   "devDependencies": {
     "ava": "^4.0.1",
-    "prebuildify": "4.2.1"
+    "prebuildify": "5.0.1"
   }
 }
